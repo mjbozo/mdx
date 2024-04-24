@@ -1,0 +1,133 @@
+<html>
+    <head>
+        <script>
+            const handleClick = () => {
+                console.log("Hello!");
+            }
+        </script>
+        <style>
+        	*, *::before, *::after {
+        		box-sizing: border-box;
+        		padding: 0;
+        		margin: 0;
+	        	font-family: sans-serif;
+        	}
+
+        	body {
+        		margin: 24px;
+        	}
+
+        	code {
+        		font-family: monospace;
+        	}
+
+        	blockquote {
+	        	margin: 0;
+			    padding: 0 1em;
+			    color: #57606a;
+			    border-left: .25em solid #d0d7de;
+		    }
+
+		    .code-block {
+			    display: block;
+			    border-radius: 4px;
+			    background-color: #1c373d;
+			    color: #dbdbe3;
+			    counter-reset: line;
+			    position: relative;
+			    margin: 16px 0;
+			    overflow-x: auto;
+			    scrollbar-width: thin;
+		    }
+
+		    .code-block > pre {
+			    font-family: 'Consolas', monospace;
+		    }
+
+			.code-block > pre::before {
+			    counter-increment: line;
+			    content: counter(line);
+			    display: inline-block;
+			    width: 40px;
+			    background-color: #030c0e;
+			    padding: 2px 8px 2px 2px;
+			    margin-right: 12px;
+			    text-align: right;
+			    color: #7f7a7a;
+			}
+
+			.primary-btn {
+				cursor: pointer;
+				border: none;
+				margin: none;
+				padding: 8px 12px;
+				background-color: teal;
+				color: whitesmoke;
+				border-radius: 4px;
+			}
+        </style>
+    </head>
+<body>
+    <h1>Hello I'm a Heading <p>with a p tag inside?!</p></h1>
+    <p>This is a paragraph!</p>
+    <br/>
+    <p class="test">This is also a paragraph! :O</p>
+    <br/>
+    <p>This is a new paragraph which should not have class of test. But is made up of multiple lines</p>
+    <br/>
+    <code>code me</code>
+    <br/>
+    <h3>Heading again but diff</h3>
+    <br/>
+    <strong>STRONK</strong>
+    <p>mode</p>
+    <br/>
+    **hello*
+    <br/>
+    <em>bye</em>
+    <strong>bye</strong>
+    <br/>
+    <br/>
+    <blockquote>Quote me</blockquote>
+    <br/>
+    <blockquote>Quote me again</blockquote>
+    <br/>
+    <blockquote>Multi line</blockquote>
+    <br/>
+    <ol start="1">
+    <li><p>> First</p></li>
+    <li><p>Second</p></li>
+    <li><p>Third</p></li>
+</ol>
+    <br/>
+    <ul>
+    <li><p>One</p></li>
+    <li><p>Two</p></li>
+    <li><p>Three</p></li>
+</ul>
+    <br/>
+    <hr/>
+    <br/>
+    <br/>
+    <div class="code-block">
+    <pre>package main</pre>
+    <pre>import "fmt"</pre>
+    <pre>func main() {</pre>
+    <pre>    fmt.Printf("Hello, world")</pre>
+    <pre>}</pre>
+</div>
+    <br/>
+    <br/>
+    <br/>
+    <button class="primary-btn" onclick="handleClick()">
+    Click Me
+</button>
+    <br/>
+    <br/>
+    <p>Hello</p>
+    <br/>
+    <img src="https://img.pokemondb.net/artwork/avif/regirock.avif" alt="Reginald"/>
+    <br/>
+    <br/>
+</body>
+</html>

@@ -1,0 +1,77 @@
+// MDX is a custom markdown extension format where custom data can be added to regular markdown tags
+// The format is simple and is as follows:
+
+[Markdown Symbol] [{ custom properties }] [Text]
+
+// where custom properties are in the form
+.[name]=value
+
+// Multiple properties can be included inside the squirlies, separated by a space
+
+// The motivation behind MDX is to add properties to a resulting HTML file the is generated from the MDX.
+// The main use case is expected to be able to add class tags to the HTML elements, so custom styling can be applied.
+
+# { .data=value } Heading 1
+
+// e.g.
+# { .class=section-header } Building a Blog 
+
+The MDX to HTML conversion is:
+
+Headers
+#           ->  <h1>
+##          ->  <h2>
+###         ->  <h3>
+####        ->  <h4>
+#####       ->  <h5>
+######      ->  <h6>
+
+Single formatting
+` `         ->  <code></code>
+** **       ->  <strong></strong>
+* *         ->  <em></em>
+>           ->  <blockquote>
+
+Lists
+1., 2., ..  ->  <ol><li></li>...</ol>
+-, ...      ->  <ul><li></li>...</ul>
+
+Images
+![x](y)     ->  <img src=y alt=x/>
+
+Rules
+---         ->  <hr>
+___         ->  <hr> (thick)
+
+Links
+[x](y)      ->  <a href=y>x</a>
+<x>         ->  <a href=x>x</a>
+
+MDX Custom
+~[x](y)     ->  <button onclick=y>x</button>
+[ ]         ->  <div></div>
+@ @         ->  <nav></nav>
+$ $         ->  <span></span>
+^^ ^^       ->  code block style
+//          ->  comments
+
+
+Default transformation will use a <p> tag.
+An empty block can still have custom properties, e.g.
+
+{ .class=custom-block }
+hello this is a stand-alone paragraph
+
+or
+
+{ .class=custom-block } hello this is a stand-alone paragraph
+
+
+Continuous blocks will be considered part of the same component and have the same properties
+Only an empty line will reset the formatter
+
+'\' are interpreted as the escape character and will tell MDX to render the next character as-is.
+
+TBC
+- To differentiate div blocks from links, the opening bracket of a div block should be followed by any whitespace
+  (' ', '\n', \t), whereas the opening bracket of a link should be followed by a single or double quote
