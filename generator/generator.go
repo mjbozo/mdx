@@ -17,6 +17,10 @@ func GenerateDocument(filename string, elements []ast.Component) {
 
 	file.WriteString(`<html>
     <head>
+		<meta charset="UTF-8" />
+		<title>MDX Sample</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="description" content="" />
         <script>
             const handleClick = () => {
                 console.log("Hello!");

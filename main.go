@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"mdx/generator"
 	"mdx/lexer"
@@ -28,8 +29,30 @@ func (e *InvalidFileError) Error() string {
 // TODO: Div doesn't return fragment when no closing bracket exists
 
 func main() {
+	args := os.Args
 
-	err := Generate("sample.mdx")
+	fmt.Println(args)
+	if len(args) == 1 || (len(args) > 1 && (args[1] == "-h" || args[1] == "--help")) {
+		fmt.Printf("\t== MDX v0.1 ==\n" +
+			"Usage:\n\t`mdx [file] [options]\n\n" +
+			"Options:\n" +
+			"\t-o\tspecify output file location\n" +
+			"\t-h\thelp\n\n")
+		return
+	}
+
+	filename := args[1]
+	outputFilename := strings.TrimSuffix(strings.TrimSuffix(filename, ".mdx"), ".md") + ".html"
+
+	fs := flag.NewFlagSet("mdx", flag.ExitOnError)
+	fs.StringVar(&outputFilename, "o", outputFilename, "Specify output file path")
+	fs.Parse(args[2:])
+
+	if !strings.HasSuffix(outputFilename, ".html") {
+		outputFilename = outputFilename + ".html"
+	}
+
+	err := Generate(filename, outputFilename)
 	if err != nil {
 		fmt.Println("Error occurred: %s\n", err.Error())
 	}
@@ -57,7 +80,7 @@ func main() {
 	// generator.GenerateDocument("MyFirstAutoGenFile.html", elements)
 }
 
-func Generate(filename string) error {
+func Generate(filename, outputFilename string) error {
 	if !(strings.HasSuffix(filename, ".md") || strings.HasSuffix(filename, ".mdx")) {
 		return &InvalidFileError{}
 	}
@@ -75,7 +98,6 @@ func Generate(filename string) error {
 		return parseErr
 	}
 
-	outputFilename := strings.TrimSuffix(strings.TrimSuffix(filename, ".mdx"), ".md") + ".html"
 	generator.GenerateDocument(outputFilename, elements)
 	return nil
 }

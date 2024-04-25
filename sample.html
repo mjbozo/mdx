@@ -1,71 +1,17 @@
 <html>
     <head>
+		<meta charset="UTF-8" />
+		<title>MDX Sample</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="description" content="" />
+		<link rel="stylesheet" type="text/css" href="../not_ideal/static/global_styles.css">
+		<link rel="icon" href="static/favicon.ico">
+		<link href="https://fonts.googleapis.com/css2?family=Barlow" rel="stylesheet">
         <script>
             const handleClick = () => {
                 console.log("Hello!");
             }
         </script>
-        <style>
-        	*, *::before, *::after {
-        		box-sizing: border-box;
-        		padding: 0;
-        		margin: 0;
-	        	font-family: sans-serif;
-        	}
-
-        	body {
-        		margin: 24px;
-        	}
-
-        	code {
-        		font-family: monospace;
-        	}
-
-        	blockquote {
-	        	margin: 0;
-			    padding: 0 1em;
-			    color: #57606a;
-			    border-left: .25em solid #d0d7de;
-		    }
-
-		    .code-block {
-			    display: block;
-			    border-radius: 4px;
-			    background-color: #1c373d;
-			    color: #dbdbe3;
-			    counter-reset: line;
-			    position: relative;
-			    margin: 16px 0;
-			    overflow-x: auto;
-			    scrollbar-width: thin;
-		    }
-
-		    .code-block > pre {
-			    font-family: 'Consolas', monospace;
-		    }
-
-			.code-block > pre::before {
-			    counter-increment: line;
-			    content: counter(line);
-			    display: inline-block;
-			    width: 40px;
-			    background-color: #030c0e;
-			    padding: 2px 8px 2px 2px;
-			    margin-right: 12px;
-			    text-align: right;
-			    color: #7f7a7a;
-			}
-
-			.primary-btn {
-				cursor: pointer;
-				border: none;
-				margin: none;
-				padding: 8px 12px;
-				background-color: teal;
-				color: whitesmoke;
-				border-radius: 4px;
-			}
-        </style>
     </head>
 <body>
     <h1>Hello I'm a Heading <p>with a p tag inside?!</p></h1>
@@ -130,7 +76,6 @@
     <br/>
     <br/>
     <div>
-    <br/>
     <p>What about now</p>
     <br/>
     <h1>Header me</h1>
@@ -143,14 +88,22 @@
     <a href="https://github.com">https://github.com</a>
     <br/>
     <br/>
-    <nav>
-    <a href="home">Home</a>
-    <a href="account">Account</a>
-</nav>
-    <br/>
     <span class="inside">
     ya mum
 </span>
     <br/>
+    <br/>
+    <nav>
+    <div>
+    <a href="home">Home</a>
+    <a href="account">Account</a>
+</div>
+    <div>
+    <h1>Title</h1>
+</div>
+    <div>
+    <p>Actions </p>
+</div>
+</nav>
 </body>
 </html>

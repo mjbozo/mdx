@@ -216,8 +216,13 @@ func (p *Parser) parseTextLine(closing token.TokenType) string {
 
 func (p *Parser) parseTextBlock(closing token.TokenType) string {
 	var blockString string
+	// TODO: Clean up this condition, and include the break due to closing token
 	for !(p.curTokenIs(token.EOF) || p.curTokenIs(token.NEWLINE) && (p.peekTokenIs(token.NEWLINE) || p.peekTokenIs(token.EOF)) || (&closing != nil && p.curTokenIs(closing))) {
 		blockString += p.currentTok.Literal
+		if p.peekTokenIs(closing) {
+			break
+		}
+
 		p.nextToken()
 	}
 	return blockString
@@ -408,6 +413,10 @@ func (p *Parser) parseDiv(properties []ast.Property, closing token.TokenType) as
 	children := make([]ast.Component, 0)
 
 	p.nextToken()
+	if p.curTokenIs(token.NEWLINE) {
+		p.nextToken()
+	}
+
 	components, err := p.Parse(token.RBRACKET)
 	if err != nil {
 		panic(err.Error())
