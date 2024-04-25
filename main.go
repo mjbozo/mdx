@@ -5,6 +5,7 @@ import (
 	"mdx/generator"
 	"mdx/lexer"
 	"mdx/parser"
+	"mdx/token"
 	"os"
 	"strings"
 )
@@ -24,8 +25,10 @@ func (e *InvalidFileError) Error() string {
 // TODO: Unordered list can't be immediately followed by horizontal rule
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Need a way to put data in <head> section
+// TODO: Div doesn't return fragment when no closing bracket exists
 
 func main() {
+
 	err := Generate("sample.mdx")
 	if err != nil {
 		fmt.Println("Error occurred: %s\n", err.Error())
@@ -66,7 +69,7 @@ func Generate(filename string) error {
 
 	lexer := lexer.New(string(data))
 	parser := parser.New(lexer)
-	elements, parseErr := parser.Parse()
+	elements, parseErr := parser.Parse(token.EOF)
 
 	if parseErr != nil {
 		return parseErr
