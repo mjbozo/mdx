@@ -2,8 +2,8 @@ package generator
 
 import (
 	"fmt"
+	"github.com/matt-bourke/mdx/ast"
 	"log"
-	"mdx/ast"
 	"os"
 )
 

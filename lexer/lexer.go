@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"mdx/token"
+	"github.com/matt-bourke/mdx/token"
 )
 
 type Lexer struct {

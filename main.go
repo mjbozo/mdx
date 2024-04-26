@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"mdx/generator"
-	"mdx/lexer"
-	"mdx/parser"
-	"mdx/token"
+	"github.com/matt-bourke/mdx/generator"
+	"github.com/matt-bourke/mdx/lexer"
+	"github.com/matt-bourke/mdx/parser"
+	"github.com/matt-bourke/mdx/token"
 	"os"
 	"strings"
 )

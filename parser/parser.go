@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"mdx/ast"
-	"mdx/lexer"
-	"mdx/token"
+	"github.com/matt-bourke/mdx/ast"
+	"github.com/matt-bourke/mdx/lexer"
+	"github.com/matt-bourke/mdx/token"
 	"strconv"
 	"strings"
 )
