@@ -2,9 +2,10 @@ package generator
 
 import (
 	"fmt"
-	"github.com/matt-bourke/mdx/ast"
 	"log"
 	"os"
+
+	"github.com/matt-bourke/mdx/ast"
 )
 
 type GeneratorConfig struct {
