@@ -48,6 +48,10 @@ func (p *Parser) peekTokenIs(tokenType token.TokenType) bool {
 	return p.nextTok.Type == tokenType
 }
 
+func (p *Parser) isDoubleBreak() bool {
+	return p.curTokenIs(token.NEWLINE) && (p.peekTokenIs(token.NEWLINE) || p.peekTokenIs(token.EOF))
+}
+
 func (p *Parser) Parse(delim token.TokenType) ([]ast.Component, error) {
 	elements := make([]ast.Component, 0)
 	var properties []ast.Property
@@ -207,7 +211,7 @@ func (p *Parser) parseFragment(properties []ast.Property, closing token.TokenTyp
 
 func (p *Parser) parseTextLine(closing token.TokenType) string {
 	var lineString string
-	for !(p.curTokenIs(token.NEWLINE) || (&closing != nil && p.curTokenIs(closing))) {
+	for !(p.curTokenIs(token.NEWLINE) || p.curTokenIs(closing)) {
 		lineString += p.currentTok.Literal
 		p.nextToken()
 	}
@@ -216,15 +220,11 @@ func (p *Parser) parseTextLine(closing token.TokenType) string {
 
 func (p *Parser) parseTextBlock(closing token.TokenType) string {
 	var blockString string
-	// TODO: Clean up this condition, and include the break due to closing token
-	for !(p.curTokenIs(token.EOF) || p.curTokenIs(token.NEWLINE) && (p.peekTokenIs(token.NEWLINE) || p.peekTokenIs(token.EOF)) || (&closing != nil && p.curTokenIs(closing))) {
+	for !(p.curTokenIs(token.EOF) || p.curTokenIs(closing) || p.peekTokenIs(closing) || p.isDoubleBreak()) {
 		blockString += p.currentTok.Literal
-		if p.peekTokenIs(closing) {
-			break
-		}
-
 		p.nextToken()
 	}
+
 	return blockString
 }
 
