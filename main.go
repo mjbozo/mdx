@@ -52,7 +52,15 @@ func main() {
 		outputFilename = outputFilename + ".html"
 	}
 
-	err := Generate(filename, outputFilename)
+	config := &generator.GeneratorConfig{
+		Title:          "MDX Sample",
+		Filename:       filename,
+		OutputFilename: outputFilename,
+		CssFilename:    "sample.css",
+		FontLink:       "https://fonts.googleapis.com/css2?family=Barlow",
+	}
+
+	err := Generate(config)
 	if err != nil {
 		fmt.Println("Error occurred: %s\n", err.Error())
 	}
@@ -80,12 +88,12 @@ func main() {
 	// generator.GenerateDocument("MyFirstAutoGenFile.html", elements)
 }
 
-func Generate(filename, outputFilename string) error {
-	if !(strings.HasSuffix(filename, ".md") || strings.HasSuffix(filename, ".mdx")) {
+func Generate(config *generator.GeneratorConfig) error {
+	if !(strings.HasSuffix(config.Filename, ".md") || strings.HasSuffix(config.Filename, ".mdx")) {
 		return &InvalidFileError{}
 	}
 
-	data, readErr := os.ReadFile(filename)
+	data, readErr := os.ReadFile(config.Filename)
 	if readErr != nil {
 		return readErr
 	}
@@ -98,6 +106,7 @@ func Generate(filename, outputFilename string) error {
 		return parseErr
 	}
 
-	generator.GenerateDocument(outputFilename, elements)
+	generator.GenerateDocument(elements, config)
+
 	return nil
 }

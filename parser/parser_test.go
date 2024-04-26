@@ -3,6 +3,7 @@ package parser
 import (
 	"mdx/ast"
 	"mdx/lexer"
+	"mdx/token"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func TestCode(t *testing.T) {
 	input := "`print('Hello, world!')`"
 	lex := lexer.New(input)
 	parser := New(lex)
-	elements, parseErr := parser.Parse()
+	elements, parseErr := parser.Parse(token.EOF)
 	if parseErr != nil {
 		t.Errorf("Code parse failed: %s", parseErr.Error())
 	}
@@ -43,7 +44,7 @@ func TestCode(t *testing.T) {
 	input = "`print('Hello, world!')"
 	lex = lexer.New(input)
 	parser = New(lex)
-	elements, parseErr = parser.Parse()
+	elements, parseErr = parser.Parse(token.EOF)
 	if parseErr != nil {
 		t.Errorf("Code parse failed: %s", parseErr.Error())
 	}
