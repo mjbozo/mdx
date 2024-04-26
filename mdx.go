@@ -27,6 +27,7 @@ func (e *InvalidFileError) Error() string {
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Need a way to put data in <head> section
 // TODO: Div doesn't return fragment when no closing bracket exists
+// TODO: Newlines inserting line break elements after blocks finish
 
 func main() {
 	args := os.Args
@@ -64,28 +65,6 @@ func main() {
 	if err != nil {
 		fmt.Println("Error occurred: %s\n", err.Error())
 	}
-
-	// data, err := os.ReadFile("./sample.mdx")
-	// if err != nil {
-	// 	fmt.Printf("File error: %s\n", err.Error())
-	// }
-
-	// l := lexer.New(string(data))
-	// p := parser.New(l)
-	// elements := p.Parse()
-
-	// tok := l.NextToken()
-	// for tok.Type != token.EOF {
-	// 	fmt.Println(tok.String())
-	// 	tok = l.NextToken()
-	// }
-	// header := &ast.Header{Text: "My First Auto Generated File!"}
-	// paragraph := &ast.Paragraph{Text: "How cool is this?!"}
-	// button := &ast.Button{OnClick: "handleClick", Child: &ast.Fragment{String: "Click Me"}}
-	// code := &ast.CodeBlock{Content: content}
-
-	// root := &ast.Div{Children: []ast.Component{header, paragraph, button, code}}
-	// generator.GenerateDocument("MyFirstAutoGenFile.html", elements)
 }
 
 func Generate(config *generator.GeneratorConfig) error {
