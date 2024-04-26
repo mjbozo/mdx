@@ -28,7 +28,7 @@ func (e *InvalidFileError) Error() string {
 // TODO: Need a way to put data in <head> section
 // TODO: Div doesn't return fragment when no closing bracket exists
 
-func test() {
+func main() {
 	args := os.Args
 
 	fmt.Println(args)
