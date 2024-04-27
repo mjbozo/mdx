@@ -10,11 +10,9 @@ import (
 
 type GeneratorConfig struct {
 	Title          string
-	Filename       string
+	InputFilename  string
 	OutputFilename string
-	CssFilename    string
-	Favicon        string
-	FontLink       string
+	Links          []map[string]string
 }
 
 func GenerateDocument(elements []ast.Component, config *GeneratorConfig) {
@@ -36,20 +34,31 @@ func GenerateDocument(elements []ast.Component, config *GeneratorConfig) {
 		<title>%s</title>`, config.Title))
 	}
 
-	if len(config.CssFilename) > 0 {
-		file.WriteString(fmt.Sprintf(`
-		<link rel="stylesheet" type="text/css" href="%s">`, config.CssFilename))
+	for _, link := range config.Links {
+		linkString := "<link "
+		for name, value := range link {
+			if len(value) > 0 {
+				linkString += fmt.Sprintf("%s=\"%s\" ", name, value)
+			}
+		}
+		linkString += ">"
+		file.WriteString(linkString)
 	}
 
-	if len(config.Favicon) > 0 {
-		file.WriteString(fmt.Sprintf(`
-		<link rel="icon" href="static/favicon.ico">`, config.Favicon))
-	}
+	// if len(config.CssFilename) > 0 {
+	// 	file.WriteString(fmt.Sprintf(`
+	// 	<link rel="stylesheet" type="text/css" href="%s">`, config.CssFilename))
+	// }
 
-	if len(config.FontLink) > 0 {
-		file.WriteString(fmt.Sprintf(`
-		<link rel="stylesheet" href="%s">`, config.FontLink))
-	}
+	// if len(config.Favicon) > 0 {
+	// 	file.WriteString(fmt.Sprintf(`
+	// 	<link rel="icon" href="static/favicon.ico">`, config.Favicon))
+	// }
+
+	// if len(config.FontLink) > 0 {
+	// 	file.WriteString(fmt.Sprintf(`
+	// 	<link rel="stylesheet" href="%s">`, config.FontLink))
+	// }
 
 	file.WriteString(`
         <script>

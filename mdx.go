@@ -55,10 +55,19 @@ func main() {
 
 	config := &generator.GeneratorConfig{
 		Title:          "MDX Sample",
-		Filename:       filename,
+		InputFilename:  filename,
 		OutputFilename: outputFilename,
-		CssFilename:    "sample.css",
-		FontLink:       "https://fonts.googleapis.com/css2?family=Barlow",
+		Links: []map[string]string{
+			{
+				"rel":  "stylesheet",
+				"href": "sample.css",
+				"type": "text/css",
+			},
+			{
+				"rel":  "stylesheet",
+				"href": "https://fonts.googleapis.com/css2?family=Barlow",
+			},
+		},
 	}
 
 	err := Generate(config)
@@ -68,11 +77,11 @@ func main() {
 }
 
 func Generate(config *generator.GeneratorConfig) error {
-	if !(strings.HasSuffix(config.Filename, ".md") || strings.HasSuffix(config.Filename, ".mdx")) {
+	if !(strings.HasSuffix(config.InputFilename, ".md") || strings.HasSuffix(config.InputFilename, ".mdx")) {
 		return &InvalidFileError{}
 	}
 
-	data, readErr := os.ReadFile(config.Filename)
+	data, readErr := os.ReadFile(config.InputFilename)
 	if readErr != nil {
 		return readErr
 	}
