@@ -1,14 +1,13 @@
 package mdx
 
 import (
-	"flag"
-	"fmt"
+	"os"
+	"strings"
+
 	"github.com/matt-bourke/mdx/generator"
 	"github.com/matt-bourke/mdx/lexer"
 	"github.com/matt-bourke/mdx/parser"
 	"github.com/matt-bourke/mdx/token"
-	"os"
-	"strings"
 )
 
 type InvalidFileError struct {
@@ -29,51 +28,27 @@ func (e *InvalidFileError) Error() string {
 // TODO: Div doesn't return fragment when no closing bracket exists
 // TODO: Newlines inserting line break elements after blocks finish
 
-func main() {
-	args := os.Args
-
-	fmt.Println(args)
-	if len(args) == 1 || (len(args) > 1 && (args[1] == "-h" || args[1] == "--help")) {
-		fmt.Printf("\t== MDX v0.1 ==\n" +
-			"Usage:\n\t`mdx [file] [options]\n\n" +
-			"Options:\n" +
-			"\t-o\tspecify output file location\n" +
-			"\t-h\thelp\n\n")
-		return
+func Transform(inputFilename string) (string, error) {
+	if !(strings.HasSuffix(inputFilename, ".md") || strings.HasSuffix(inputFilename, ".mdx")) {
+		return "", &InvalidFileError{}
 	}
 
-	filename := args[1]
-	outputFilename := strings.TrimSuffix(strings.TrimSuffix(filename, ".mdx"), ".md") + ".html"
-
-	fs := flag.NewFlagSet("mdx", flag.ExitOnError)
-	fs.StringVar(&outputFilename, "o", outputFilename, "Specify output file path")
-	fs.Parse(args[2:])
-
-	if !strings.HasSuffix(outputFilename, ".html") {
-		outputFilename = outputFilename + ".html"
+	data, readErr := os.ReadFile(inputFilename)
+	if readErr != nil {
+		return "", readErr
 	}
 
-	config := &generator.GeneratorConfig{
-		Title:          "MDX Sample",
-		InputFilename:  filename,
-		OutputFilename: outputFilename,
-		Links: []map[string]string{
-			{
-				"rel":  "stylesheet",
-				"href": "sample.css",
-				"type": "text/css",
-			},
-			{
-				"rel":  "stylesheet",
-				"href": "https://fonts.googleapis.com/css2?family=Barlow",
-			},
-		},
+	lexer := lexer.New(string(data))
+	parser := parser.New(lexer)
+	elements, parseErr := parser.Parse(token.EOF)
+
+	if parseErr != nil {
+		return "", parseErr
 	}
 
-	err := Generate(config)
-	if err != nil {
-		fmt.Println("Error occurred: %s\n", err.Error())
-	}
+	htmlString := generator.TransformMDX(elements)
+
+	return htmlString, nil
 }
 
 func Generate(config *generator.GeneratorConfig) error {
@@ -94,7 +69,7 @@ func Generate(config *generator.GeneratorConfig) error {
 		return parseErr
 	}
 
-	generator.GenerateDocument(elements, config)
+	err := generator.GenerateHtml(elements, config)
 
-	return nil
+	return err
 }
