@@ -62,3 +62,53 @@ func TestCode(t *testing.T) {
 		t.Errorf("Invalid code parse failed: Expected Fragment, got=%T", element)
 	}
 }
+
+func TestDiv(t *testing.T) {
+	input := `[
+    Hello
+]`
+	lex := lexer.New(input)
+	parser := New(lex)
+	elements, parseErr := parser.Parse(token.EOF)
+	if parseErr != nil {
+		t.Errorf("Div parse failed: %s", parseErr.Error())
+	}
+
+	if len(elements) != 1 {
+		t.Errorf("Div parse failed: Expected 1 element, got=%d", len(elements))
+	}
+
+	element := elements[0]
+	if div, ok := element.(*ast.Div); ok {
+		if len(div.Children) != 1 {
+			t.Errorf("Div parse failed: Exected one child, got=%d", len(div.Children))
+		}
+	} else {
+		t.Errorf("Div parse failed: Expected Div type, got=%T", element)
+	}
+
+	input = `[
+    Hello
+]
+
+`
+	lex = lexer.New(input)
+	parser = New(lex)
+	elements, parseErr = parser.Parse(token.EOF)
+	if parseErr != nil {
+		t.Errorf("Div parse failed: %s", parseErr.Error())
+	}
+
+	if len(elements) != 1 {
+		t.Errorf("Div parse failed: Expected 1 element, got=%d", len(elements))
+	}
+
+	element = elements[0]
+	if div, ok := element.(*ast.Div); ok {
+		if len(div.Children) != 1 {
+			t.Errorf("Div parse failed: Exected one child, got=%d", len(div.Children))
+		}
+	} else {
+		t.Errorf("Div parse failed: Expected Div type, got=%T", element)
+	}
+}

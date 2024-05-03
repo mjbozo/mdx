@@ -308,13 +308,7 @@ func TestSpan(t *testing.T) {
 }
 
 func TestCodeBlock(t *testing.T) {
-	content := `package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, world!")
-}`
+	content := `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, world!")\n}`
 	codeBlock := CodeBlock{Content: content}
 	codeBlockHtml := codeBlock.Html()
 	expected := `<div class="code-block">

@@ -165,7 +165,7 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 	}
 
 	// if block component, skip newlines
-	if isBlockElement(component) {
+	if component != nil && isBlockElement(component) {
 		for p.curTokenIs(token.NEWLINE) {
 			p.nextToken()
 		}
@@ -176,11 +176,11 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 
 func isBlockElement(component ast.Component) bool {
 	switch component.(type) {
-	case *ast.Div:
-	case *ast.CodeBlock:
-	case *ast.HorizontalRule:
-	case *ast.Image:
-	case *ast.Nav:
+	case *ast.Div,
+		*ast.CodeBlock,
+		*ast.HorizontalRule,
+		*ast.Image,
+		*ast.Nav:
 		return true
 	}
 	return false
@@ -444,6 +444,8 @@ func (p *Parser) parseDiv(properties []ast.Property, closing token.TokenType) as
 	for _, component := range components {
 		children = append(children, component)
 	}
+
+	p.nextToken()
 
 	return &ast.Div{Properties: properties, Children: children}
 }
