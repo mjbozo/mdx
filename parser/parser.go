@@ -155,7 +155,7 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 			component = p.parseFragment(properties, closing)
 		}
 	case token.NEWLINE:
-		component = &ast.LineBreak{}
+		// component = &ast.LineBreak{}
 	case token.SLASH:
 		if p.peekTokenIs(token.SLASH) {
 			p.parseComment()
