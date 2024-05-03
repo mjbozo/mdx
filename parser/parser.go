@@ -165,11 +165,11 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 	}
 
 	// if block component, skip newlines
-	if component != nil && isBlockElement(component) {
-		for p.curTokenIs(token.NEWLINE) {
-			p.nextToken()
-		}
-	}
+	// if component != nil && isBlockElement(component) {
+	// 	for p.curTokenIs(token.NEWLINE) {
+	// 		p.nextToken()
+	// 	}
+	// }
 
 	return component
 }
