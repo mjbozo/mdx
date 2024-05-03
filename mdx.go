@@ -26,7 +26,6 @@ func (e *InvalidFileError) Error() string {
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Need a way to put data in <head> section. UPDATE: Maybe not
 // TODO: Div doesn't return fragment when no closing bracket exists
-// TODO: Newlines inserting line break elements after blocks finish
 
 func Transform(inputFilename string) (string, error) {
 	if !(strings.HasSuffix(inputFilename, ".md") || strings.HasSuffix(inputFilename, ".mdx")) {

@@ -155,7 +155,7 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 			component = p.parseFragment(properties, closing)
 		}
 	case token.NEWLINE:
-		// component = &ast.LineBreak{}
+		component = &ast.LineBreak{}
 	case token.SLASH:
 		if p.peekTokenIs(token.SLASH) {
 			p.parseComment()
@@ -165,11 +165,11 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 	}
 
 	// if block component, skip newlines
-	// if component != nil && isBlockElement(component) {
-	// 	for p.curTokenIs(token.NEWLINE) {
-	// 		p.nextToken()
-	// 	}
-	// }
+	if component != nil && isBlockElement(component) {
+		for p.peekTokenIs(token.NEWLINE) {
+			p.nextToken()
+		}
+	}
 
 	return component
 }
@@ -180,6 +180,7 @@ func isBlockElement(component ast.Component) bool {
 		*ast.CodeBlock,
 		*ast.HorizontalRule,
 		*ast.Image,
+		*ast.Button,
 		*ast.Nav:
 		return true
 	}
@@ -432,7 +433,7 @@ func (p *Parser) parseDiv(properties []ast.Property, closing token.TokenType) as
 	children := make([]ast.Component, 0)
 
 	p.nextToken()
-	if p.curTokenIs(token.NEWLINE) {
+	for p.curTokenIs(token.NEWLINE) {
 		p.nextToken()
 	}
 
@@ -445,7 +446,9 @@ func (p *Parser) parseDiv(properties []ast.Property, closing token.TokenType) as
 		children = append(children, component)
 	}
 
-	p.nextToken()
+	if p.peekTokenIs(token.NEWLINE) {
+		p.nextToken()
+	}
 
 	return &ast.Div{Properties: properties, Children: children}
 }
