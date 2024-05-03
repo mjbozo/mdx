@@ -50,14 +50,14 @@ func Transform(inputFilename string) (string, error) {
 	return htmlString, nil
 }
 
-func Generate(config *generator.GeneratorConfig) error {
+func Generate(config *generator.GeneratorConfig) (int, error) {
 	if !(strings.HasSuffix(config.InputFilename, ".md") || strings.HasSuffix(config.InputFilename, ".mdx")) {
-		return &InvalidFileError{}
+		return 0, &InvalidFileError{}
 	}
 
 	data, readErr := os.ReadFile(config.InputFilename)
 	if readErr != nil {
-		return readErr
+		return 0, readErr
 	}
 
 	lexer := lexer.New(string(data))
@@ -65,10 +65,10 @@ func Generate(config *generator.GeneratorConfig) error {
 	elements, parseErr := parser.Parse(token.EOF)
 
 	if parseErr != nil {
-		return parseErr
+		return 0, parseErr
 	}
 
-	err := generator.GenerateHtml(elements, config)
+	n, err := generator.GenerateHtml(elements, config)
 
-	return err
+	return n, err
 }
