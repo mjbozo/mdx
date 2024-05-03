@@ -24,7 +24,7 @@ func (e *InvalidFileError) Error() string {
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
 // TODO: Unordered list can't be immediately followed by horizontal rule
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
-// TODO: Need a way to put data in <head> section
+// TODO: Need a way to put data in <head> section. UPDATE: Maybe not
 // TODO: Div doesn't return fragment when no closing bracket exists
 // TODO: Newlines inserting line break elements after blocks finish
 

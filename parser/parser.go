@@ -164,7 +164,26 @@ func (p *Parser) parseComponent(properties []ast.Property, closing token.TokenTy
 		}
 	}
 
+	// if block component, skip newlines
+	if isBlockElement(component) {
+		for p.curTokenIs(token.NEWLINE) {
+			p.nextToken()
+		}
+	}
+
 	return component
+}
+
+func isBlockElement(component ast.Component) bool {
+	switch component.(type) {
+	case *ast.Div:
+	case *ast.CodeBlock:
+	case *ast.HorizontalRule:
+	case *ast.Image:
+	case *ast.Nav:
+		return true
+	}
+	return false
 }
 
 func (p *Parser) parseProperties() ([]ast.Property, error) {
