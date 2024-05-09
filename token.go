@@ -1,4 +1,4 @@
-package token
+package mdx
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ const (
 	WORD = "WORD"
 )
 
-func New(t TokenType, literal string) Token {
+func NewToken(t TokenType, literal string) Token {
 	return Token{Type: t, Literal: literal}
 }
 

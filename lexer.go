@@ -1,8 +1,4 @@
-package lexer
-
-import (
-	"github.com/matt-bourke/mdx/token"
-)
+package mdx
 
 type Lexer struct {
 	input        string
@@ -11,7 +7,7 @@ type Lexer struct {
 	ch           byte
 }
 
-func New(input string) *Lexer {
+func NewLexer(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l
@@ -27,72 +23,72 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
-func (l *Lexer) NextToken() token.Token {
-	var tok token.Token
+func (l *Lexer) NextToken() Token {
+	var tok Token
 
 	switch l.ch {
 	case '#':
-		tok = token.New(token.HASH, string(l.ch))
+		tok = NewToken(HASH, string(l.ch))
 	case '{':
-		tok = token.New(token.LSQUIRLY, string(l.ch))
+		tok = NewToken(LSQUIRLY, string(l.ch))
 	case '}':
-		tok = token.New(token.RSQUIRLY, string(l.ch))
+		tok = NewToken(RSQUIRLY, string(l.ch))
 	case '(':
-		tok = token.New(token.LPAREN, string(l.ch))
+		tok = NewToken(LPAREN, string(l.ch))
 	case ')':
-		tok = token.New(token.RPAREN, string(l.ch))
+		tok = NewToken(RPAREN, string(l.ch))
 	case '[':
-		tok = token.New(token.LBRACKET, string(l.ch))
+		tok = NewToken(LBRACKET, string(l.ch))
 	case ']':
-		tok = token.New(token.RBRACKET, string(l.ch))
+		tok = NewToken(RBRACKET, string(l.ch))
 	case '!':
-		tok = token.New(token.BANG, string(l.ch))
+		tok = NewToken(BANG, string(l.ch))
 	case '\t':
-		tok = token.New(token.TAB, "\\t")
+		tok = NewToken(TAB, "\\t")
 	case '\n':
-		tok = token.New(token.NEWLINE, "\\n")
+		tok = NewToken(NEWLINE, "\\n")
 	case '`':
-		tok = token.New(token.BACKTICK, string(l.ch))
+		tok = NewToken(BACKTICK, string(l.ch))
 	case '*':
-		tok = token.New(token.ASTERISK, string(l.ch))
+		tok = NewToken(ASTERISK, string(l.ch))
 	case '<':
-		tok = token.New(token.LT, string(l.ch))
+		tok = NewToken(LT, string(l.ch))
 	case '>':
-		tok = token.New(token.GT, string(l.ch))
+		tok = NewToken(GT, string(l.ch))
 	case '.':
-		tok = token.New(token.DOT, string(l.ch))
+		tok = NewToken(DOT, string(l.ch))
 	case '-':
-		tok = token.New(token.DASH, string(l.ch))
+		tok = NewToken(DASH, string(l.ch))
 	case '_':
-		tok = token.New(token.UNDERSCORE, string(l.ch))
+		tok = NewToken(UNDERSCORE, string(l.ch))
 	case '/':
-		tok = token.New(token.SLASH, string(l.ch))
+		tok = NewToken(SLASH, string(l.ch))
 	case '\\':
-		tok = token.New(token.BACKSLASH, string(l.ch))
+		tok = NewToken(BACKSLASH, string(l.ch))
 	case '@':
-		tok = token.New(token.AT, string(l.ch))
+		tok = NewToken(AT, string(l.ch))
 	case '=':
-		tok = token.New(token.EQUALS, string(l.ch))
+		tok = NewToken(EQUALS, string(l.ch))
 	case '~':
-		tok = token.New(token.TIDLE, string(l.ch))
+		tok = NewToken(TIDLE, string(l.ch))
 	case '$':
-		tok = token.New(token.DOLLAR, string(l.ch))
+		tok = NewToken(DOLLAR, string(l.ch))
 	case '^':
-		tok = token.New(token.CARET, string(l.ch))
+		tok = NewToken(CARET, string(l.ch))
 	case ' ':
-		tok = token.New(token.SPACE, string(l.ch))
+		tok = NewToken(SPACE, string(l.ch))
 	case 0:
-		tok = token.New(token.EOF, "")
+		tok = NewToken(EOF, "")
 	default:
 		if isDigit(l.ch) && l.peekChar() == '.' {
 			// TODO: This only works for single digits
 			// maybe change this later in case some psycho starts the list as an insane number
-			tok = token.New(token.LISTELEMENT, string(l.ch)+".")
+			tok = NewToken(LISTELEMENT, string(l.ch)+".")
 			l.readChar()
 			l.readChar()
 		} else {
 			word := l.readWord()
-			tok = token.New(token.WORD, word)
+			tok = NewToken(WORD, word)
 		}
 		return tok
 	}

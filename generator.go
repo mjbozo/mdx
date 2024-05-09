@@ -1,11 +1,9 @@
-package generator
+package mdx
 
 import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/matt-bourke/mdx/ast"
 )
 
 type GeneratorConfig struct {
@@ -15,13 +13,15 @@ type GeneratorConfig struct {
 	Links          []map[string]string
 }
 
-func TransformMDX(elements []ast.Component) string {
-	body := &ast.Body{Children: elements}
+func TransformMDX(elements []Component) string {
+	// Note: Testing changing from body to div and putting more in the template.html
+	// body := &Body{Children: elements}
+	body := &Div{Children: elements}
 	htmlString := body.Html()
 	return htmlString
 }
 
-func GenerateHtml(elements []ast.Component, config *GeneratorConfig) (int, error) {
+func GenerateHtml(elements []Component, config *GeneratorConfig) (int, error) {
 	file, fileErr := os.OpenFile(config.OutputFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if fileErr != nil {
 		log.Fatal(fileErr.Error())
@@ -55,7 +55,7 @@ func GenerateHtml(elements []ast.Component, config *GeneratorConfig) (int, error
     </head>
 `)
 
-	body := &ast.Body{Children: elements}
+	body := &Body{Children: elements}
 	n, writeErr := file.WriteString(body.Html())
 	if writeErr != nil {
 		log.Fatal(writeErr.Error())

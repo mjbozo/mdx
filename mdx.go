@@ -3,11 +3,6 @@ package mdx
 import (
 	"os"
 	"strings"
-
-	"github.com/matt-bourke/mdx/generator"
-	"github.com/matt-bourke/mdx/lexer"
-	"github.com/matt-bourke/mdx/parser"
-	"github.com/matt-bourke/mdx/token"
 )
 
 type InvalidFileError struct {
@@ -18,6 +13,8 @@ func (e *InvalidFileError) Error() string {
 	return "Invalid file type. File must have .md or .mdx extension"
 }
 
+// TODO: HTML Formatting
+// TODO: Code block formatting
 // TODO: Ordered list only parses when list starts with single digit number
 // TODO: Format HTML correctly when generating file
 // TODO: Blockquote are not able to be nested at the moment
@@ -39,20 +36,20 @@ func Transform(inputFilename string) (string, error) {
 		return "", readErr
 	}
 
-	lexer := lexer.New(string(data))
-	parser := parser.New(lexer)
-	elements, parseErr := parser.Parse(token.EOF)
+	lexer := NewLexer(string(data))
+	parser := NewParser(lexer)
+	elements, parseErr := parser.Parse(EOF)
 
 	if parseErr != nil {
 		return "", parseErr
 	}
 
-	htmlString := generator.TransformMDX(elements)
+	htmlString := TransformMDX(elements)
 
 	return htmlString, nil
 }
 
-func Generate(config *generator.GeneratorConfig) (int, error) {
+func Generate(config *GeneratorConfig) (int, error) {
 	if !(strings.HasSuffix(config.InputFilename, ".md") || strings.HasSuffix(config.InputFilename, ".mdx")) {
 		return 0, &InvalidFileError{}
 	}
@@ -62,15 +59,15 @@ func Generate(config *generator.GeneratorConfig) (int, error) {
 		return 0, readErr
 	}
 
-	lexer := lexer.New(string(data))
-	parser := parser.New(lexer)
-	elements, parseErr := parser.Parse(token.EOF)
+	lexer := NewLexer(string(data))
+	parser := NewParser(lexer)
+	elements, parseErr := parser.Parse(EOF)
 
 	if parseErr != nil {
 		return 0, parseErr
 	}
 
-	n, err := generator.GenerateHtml(elements, config)
+	n, err := GenerateHtml(elements, config)
 
 	return n, err
 }
