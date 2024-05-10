@@ -5,36 +5,36 @@ import (
 	"strings"
 )
 
-type Component interface {
-	Html() string
+type component interface {
+	html() string
 }
 
-type Property struct {
+type property struct {
 	Name  string
 	Value string
 }
 
-type Fragment struct {
+type fragment struct {
 	String string
 }
 
-func (f *Fragment) Html() string {
+func (f *fragment) html() string {
 	return fmt.Sprintf("%s", f.String)
 }
 
-type LineBreak struct{}
+type lineBreak struct{}
 
-func (lb *LineBreak) Html() string {
+func (lb *lineBreak) html() string {
 	return "<br/>"
 }
 
-type Header struct {
-	Properties []Property
+type header struct {
+	Properties []property
 	Level      int
 	Text       string
 }
 
-func (h *Header) Html() string {
+func (h *header) html() string {
 	if h.Level == 0 {
 		h.Level = 1
 	}
@@ -46,12 +46,12 @@ func (h *Header) Html() string {
 	return fmt.Sprintf("<h%d%s>%s</h%d>", h.Level, propertyString, h.Text, h.Level)
 }
 
-type Paragraph struct {
-	Properties []Property
+type paragraph struct {
+	Properties []property
 	Text       string
 }
 
-func (p *Paragraph) Html() string {
+func (p *paragraph) html() string {
 	var propertyString string
 	for _, property := range p.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -59,12 +59,12 @@ func (p *Paragraph) Html() string {
 	return fmt.Sprintf("<p%s>%s</p>", propertyString, p.Text)
 }
 
-type Code struct {
-	Properties []Property
+type code struct {
+	Properties []property
 	Text       string
 }
 
-func (c *Code) Html() string {
+func (c *code) html() string {
 	var propertyString string
 	for _, property := range c.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -72,12 +72,12 @@ func (c *Code) Html() string {
 	return fmt.Sprintf("<code%s>%s</code>", propertyString, c.Text)
 }
 
-type Bold struct {
-	Properties []Property
+type bold struct {
+	Properties []property
 	Text       string
 }
 
-func (b *Bold) Html() string {
+func (b *bold) html() string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -85,12 +85,12 @@ func (b *Bold) Html() string {
 	return fmt.Sprintf("<strong%s>%s</strong>", propertyString, b.Text)
 }
 
-type Italic struct {
-	Properties []Property
+type italic struct {
+	Properties []property
 	Text       string
 }
 
-func (i *Italic) Html() string {
+func (i *italic) html() string {
 	var propertyString string
 	for _, property := range i.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -98,12 +98,12 @@ func (i *Italic) Html() string {
 	return fmt.Sprintf("<em%s>%s</em>", propertyString, i.Text)
 }
 
-type BlockQuote struct {
-	Properties []Property
+type blockQuote struct {
+	Properties []property
 	Text       string
 }
 
-func (bq *BlockQuote) Html() string {
+func (bq *blockQuote) html() string {
 	var propertyString string
 	for _, property := range bq.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -111,26 +111,26 @@ func (bq *BlockQuote) Html() string {
 	return fmt.Sprintf("<blockquote%s>%s</blockquote>", propertyString, bq.Text)
 }
 
-type ListItem struct {
-	Properties []Property
-	Component  Component
+type listItem struct {
+	Properties []property
+	Component  component
 }
 
-func (li *ListItem) Html() string {
+func (li *listItem) Html() string {
 	var propertyString string
 	for _, property := range li.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<li%s>%s</li>", propertyString, li.Component.Html())
+	return fmt.Sprintf("<li%s>%s</li>", propertyString, li.Component.html())
 }
 
-type OrderedList struct {
-	Properties []Property
-	ListItems  []ListItem
+type orderedList struct {
+	Properties []property
+	ListItems  []listItem
 	Start      int
 }
 
-func (ol *OrderedList) Html() string {
+func (ol *orderedList) html() string {
 	var propertyString string
 	for _, property := range ol.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -144,12 +144,12 @@ func (ol *OrderedList) Html() string {
 	return fmt.Sprintf("<ol start=\"%d\"%s>\n%s</ol>", ol.Start, propertyString, listItemString)
 }
 
-type UnorderedList struct {
-	Properties []Property
-	ListItems  []ListItem
+type unorderedList struct {
+	Properties []property
+	ListItems  []listItem
 }
 
-func (ul *UnorderedList) Html() string {
+func (ul *unorderedList) html() string {
 	var propertyString string
 	for _, property := range ul.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -163,13 +163,13 @@ func (ul *UnorderedList) Html() string {
 	return fmt.Sprintf("<ul%s>\n%s</ul>", propertyString, listItemString)
 }
 
-type Image struct {
-	Properties []Property
+type image struct {
+	Properties []property
 	ImgUrl     string
 	AltText    string
 }
 
-func (img *Image) Html() string {
+func (img *image) html() string {
 	var propertyString string
 	for _, property := range img.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -177,11 +177,11 @@ func (img *Image) Html() string {
 	return fmt.Sprintf("<img%s src=\"%s\" alt=\"%s\"/>", propertyString, img.ImgUrl, img.AltText)
 }
 
-type HorizontalRule struct {
-	Properties []Property
+type horizontalRule struct {
+	Properties []property
 }
 
-func (hr *HorizontalRule) Html() string {
+func (hr *horizontalRule) html() string {
 	var propertyString string
 	for _, property := range hr.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -189,13 +189,13 @@ func (hr *HorizontalRule) Html() string {
 	return fmt.Sprintf("<hr%s/>", propertyString)
 }
 
-type Link struct {
-	Properties []Property
+type link struct {
+	Properties []property
 	Url        string
 	Text       string
 }
 
-func (l *Link) Html() string {
+func (l *link) html() string {
 	var propertyString string
 	for _, property := range l.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -203,26 +203,26 @@ func (l *Link) Html() string {
 	return fmt.Sprintf("<a%s href=\"%s\">%s</a>", propertyString, l.Url, l.Text)
 }
 
-type Button struct {
-	Properties []Property
-	Child      Component
+type button struct {
+	Properties []property
+	Child      component
 	OnClick    string
 }
 
-func (b *Button) Html() string {
+func (b *button) html() string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<button%s onclick=\"%s()\">\n    %s\n</button>", propertyString, b.OnClick, b.Child.Html())
+	return fmt.Sprintf("<button%s onclick=\"%s()\">\n    %s\n</button>", propertyString, b.OnClick, b.Child.html())
 }
 
-type Div struct {
-	Properties []Property
-	Children   []Component
+type div struct {
+	Properties []property
+	Children   []component
 }
 
-func (d *Div) Html() string {
+func (d *div) html() string {
 	var divString string
 	var propertyString string
 	for _, property := range d.Properties {
@@ -235,19 +235,19 @@ func (d *Div) Html() string {
 
 	divString += fmt.Sprintf("<div%s>\n", propertyString)
 	for _, child := range d.Children {
-		divString += fmt.Sprintf("    %s\n", child.Html())
+		divString += fmt.Sprintf("    %s\n", child.html())
 	}
 	divString += "</div>"
 
 	return divString
 }
 
-type Nav struct {
-	Properties []Property
-	Children   []Component
+type nav struct {
+	Properties []property
+	Children   []component
 }
 
-func (n *Nav) Html() string {
+func (n *nav) html() string {
 	var navString string
 	var propertyString string
 	for _, property := range n.Properties {
@@ -260,19 +260,19 @@ func (n *Nav) Html() string {
 
 	navString += fmt.Sprintf("<nav%s>\n", propertyString)
 	for _, child := range n.Children {
-		navString += fmt.Sprintf("    %s\n", child.Html())
+		navString += fmt.Sprintf("    %s\n", child.html())
 	}
 	navString += "</nav>"
 
 	return navString
 }
 
-type Span struct {
-	Properties []Property
-	Children   []Component
+type span struct {
+	Properties []property
+	Children   []component
 }
 
-func (s *Span) Html() string {
+func (s *span) html() string {
 	var spanString string
 	var propertyString string
 	for _, property := range s.Properties {
@@ -285,19 +285,19 @@ func (s *Span) Html() string {
 
 	spanString += fmt.Sprintf("<span%s>\n", propertyString)
 	for _, child := range s.Children {
-		spanString += fmt.Sprintf("    %s\n", child.Html())
+		spanString += fmt.Sprintf("    %s\n", child.html())
 	}
 	spanString += fmt.Sprintf("</span>")
 
 	return spanString
 }
 
-type CodeBlock struct {
-	Properties []Property
+type codeBlock struct {
+	Properties []property
 	Content    string
 }
 
-func (cb *CodeBlock) Html() string {
+func (cb *codeBlock) html() string {
 	var codeBlockString string
 	var propertiesString string
 	for _, property := range cb.Properties {
@@ -314,14 +314,14 @@ func (cb *CodeBlock) Html() string {
 	return codeBlockString
 }
 
-type Body struct {
-	Children []Component
+type body struct {
+	Children []component
 }
 
-func (b *Body) Html() string {
+func (b *body) Html() string {
 	bodyString := "<body>\n"
 	for _, child := range b.Children {
-		bodyString += fmt.Sprintf("    %s\n", child.Html())
+		bodyString += fmt.Sprintf("    %s\n", child.html())
 	}
 	bodyString += "</body>"
 	return bodyString

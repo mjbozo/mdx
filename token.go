@@ -4,51 +4,51 @@ import (
 	"fmt"
 )
 
-type TokenType string
+type tokenType string
 
-type Token struct {
-	Type    TokenType
+type token struct {
+	Type    tokenType
 	Literal string
 }
 
 const (
-	HASH        = "#"
-	ASTERISK    = "*"
-	BACKTICK    = "`"
-	BANG        = "!"
-	LT          = "<"
-	GT          = ">"
-	DASH        = "-"
-	UNDERSCORE  = "_"
-	LISTELEMENT = "x."
+	hash        = "#"
+	asterisk    = "*"
+	backtick    = "`"
+	bang        = "!"
+	lt          = "<"
+	gt          = ">"
+	dash        = "-"
+	underscore  = "_"
+	listelement = "x."
 
-	LBRACKET = "["
-	RBRACKET = "]"
-	LPAREN   = "("
-	RPAREN   = ")"
-	LSQUIRLY = "{"
-	RSQUIRLY = "}"
+	lbracket = "["
+	rbracket = "]"
+	lparen   = "("
+	rparen   = ")"
+	lsquirly = "{"
+	rsquirly = "}"
 
-	EQUALS    = "="
-	TIDLE     = "~"
-	DOLLAR    = "$"
-	CARET     = "^"
-	DOT       = "."
-	SLASH     = "/"
-	AT        = "@"
-	BACKSLASH = "\\"
-	NEWLINE   = "\\n"
-	TAB       = "\\t"
+	equals    = "="
+	tidle     = "~"
+	dollar    = "$"
+	caret     = "^"
+	dot       = "."
+	slash     = "/"
+	at        = "@"
+	backslash = "\\"
+	newline   = "\\n"
+	tab       = "\\t"
 
-	SPACE = "SPACE"
-	WORD  = "WORD"
-	EOF   = "EOF"
+	space = "SPACE"
+	word  = "WORD"
+	eof   = "EOF"
 )
 
-func NewToken(t TokenType, literal string) Token {
-	return Token{Type: t, Literal: literal}
+func newToken(t tokenType, literal string) token {
+	return token{Type: t, Literal: literal}
 }
 
-func (t *Token) String() string {
+func (t *token) String() string {
 	return fmt.Sprintf("Token [ Type=%s, Literal=%s ]\n", t.Type, t.Literal)
 }

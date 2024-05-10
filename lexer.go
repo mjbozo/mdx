@@ -1,19 +1,19 @@
 package mdx
 
-type Lexer struct {
+type lexer struct {
 	input        string
 	position     int
 	readPosition int
 	ch           byte
 }
 
-func NewLexer(input string) *Lexer {
-	l := &Lexer{input: input}
+func newLexer(input string) *lexer {
+	l := &lexer{input: input}
 	l.readChar()
 	return l
 }
 
-func (l *Lexer) readChar() {
+func (l *lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
 	} else {
@@ -23,72 +23,72 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
-func (l *Lexer) NextToken() Token {
-	var tok Token
+func (l *lexer) nextToken() token {
+	var tok token
 
 	switch l.ch {
 	case '#':
-		tok = NewToken(HASH, string(l.ch))
+		tok = newToken(hash, string(l.ch))
 	case '{':
-		tok = NewToken(LSQUIRLY, string(l.ch))
+		tok = newToken(lsquirly, string(l.ch))
 	case '}':
-		tok = NewToken(RSQUIRLY, string(l.ch))
+		tok = newToken(rsquirly, string(l.ch))
 	case '(':
-		tok = NewToken(LPAREN, string(l.ch))
+		tok = newToken(lparen, string(l.ch))
 	case ')':
-		tok = NewToken(RPAREN, string(l.ch))
+		tok = newToken(rparen, string(l.ch))
 	case '[':
-		tok = NewToken(LBRACKET, string(l.ch))
+		tok = newToken(lbracket, string(l.ch))
 	case ']':
-		tok = NewToken(RBRACKET, string(l.ch))
+		tok = newToken(rbracket, string(l.ch))
 	case '!':
-		tok = NewToken(BANG, string(l.ch))
+		tok = newToken(bang, string(l.ch))
 	case '\t':
-		tok = NewToken(TAB, "\\t")
+		tok = newToken(tab, "\\t")
 	case '\n':
-		tok = NewToken(NEWLINE, "\\n")
+		tok = newToken(newline, "\\n")
 	case '`':
-		tok = NewToken(BACKTICK, string(l.ch))
+		tok = newToken(backtick, string(l.ch))
 	case '*':
-		tok = NewToken(ASTERISK, string(l.ch))
+		tok = newToken(asterisk, string(l.ch))
 	case '<':
-		tok = NewToken(LT, string(l.ch))
+		tok = newToken(lt, string(l.ch))
 	case '>':
-		tok = NewToken(GT, string(l.ch))
+		tok = newToken(gt, string(l.ch))
 	case '.':
-		tok = NewToken(DOT, string(l.ch))
+		tok = newToken(dot, string(l.ch))
 	case '-':
-		tok = NewToken(DASH, string(l.ch))
+		tok = newToken(dash, string(l.ch))
 	case '_':
-		tok = NewToken(UNDERSCORE, string(l.ch))
+		tok = newToken(underscore, string(l.ch))
 	case '/':
-		tok = NewToken(SLASH, string(l.ch))
+		tok = newToken(slash, string(l.ch))
 	case '\\':
-		tok = NewToken(BACKSLASH, string(l.ch))
+		tok = newToken(backslash, string(l.ch))
 	case '@':
-		tok = NewToken(AT, string(l.ch))
+		tok = newToken(at, string(l.ch))
 	case '=':
-		tok = NewToken(EQUALS, string(l.ch))
+		tok = newToken(equals, string(l.ch))
 	case '~':
-		tok = NewToken(TIDLE, string(l.ch))
+		tok = newToken(tidle, string(l.ch))
 	case '$':
-		tok = NewToken(DOLLAR, string(l.ch))
+		tok = newToken(dollar, string(l.ch))
 	case '^':
-		tok = NewToken(CARET, string(l.ch))
+		tok = newToken(caret, string(l.ch))
 	case ' ':
-		tok = NewToken(SPACE, string(l.ch))
+		tok = newToken(space, string(l.ch))
 	case 0:
-		tok = NewToken(EOF, "")
+		tok = newToken(eof, "")
 	default:
 		if isDigit(l.ch) && l.peekChar() == '.' {
 			// TODO: This only works for single digits
 			// maybe change this later in case some psycho starts the list as an insane number
-			tok = NewToken(LISTELEMENT, string(l.ch)+".")
+			tok = newToken(listelement, string(l.ch)+".")
 			l.readChar()
 			l.readChar()
 		} else {
-			word := l.readWord()
-			tok = NewToken(WORD, word)
+			wordToken := l.readWord()
+			tok = newToken(word, wordToken)
 		}
 		return tok
 	}
@@ -97,7 +97,7 @@ func (l *Lexer) NextToken() Token {
 	return tok
 }
 
-func (l *Lexer) peekChar() byte {
+func (l *lexer) peekChar() byte {
 	if l.readPosition >= len(l.input) {
 		return 0
 	} else {
@@ -113,7 +113,7 @@ func isClosingPair(ch byte) bool {
 	return ch == ']' || ch == ')' || ch == '>' || ch == '*' || ch == '`'
 }
 
-func (l *Lexer) readWord() string {
+func (l *lexer) readWord() string {
 	position := l.position
 	for !isWhitespace(l.ch) && !isClosingPair(l.ch) && l.ch != '=' {
 		l.readChar()
@@ -121,7 +121,7 @@ func (l *Lexer) readWord() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) isLetter(ch byte) bool {
+func (l *lexer) isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
 }
 

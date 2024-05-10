@@ -6,56 +6,56 @@ import (
 	"strings"
 )
 
-type Parser struct {
-	l          *Lexer
-	currentTok Token
-	nextTok    Token
+type parser struct {
+	l          *lexer
+	currentTok token
+	nextTok    token
 }
 
-func NewParser(lex *Lexer) *Parser {
-	parser := &Parser{l: lex}
+func newParser(lex *lexer) *parser {
+	parser := &parser{l: lex}
 	parser.nextToken()
 	parser.nextToken()
 	return parser
 }
 
-type ParseError struct {
+type parseError struct {
 	error
 	errorReason string
 }
 
-func (p *ParseError) Error() string {
+func (p *parseError) Error() string {
 	return fmt.Sprintf("ParseError occurred: %s", p.errorReason)
 }
 
-func (p *Parser) nextToken() {
+func (p *parser) nextToken() {
 	p.currentTok = p.nextTok
-	p.nextTok = p.l.NextToken()
+	p.nextTok = p.l.nextToken()
 }
 
-func (p *Parser) peekToken() Token {
+func (p *parser) peekToken() token {
 	return p.nextTok
 }
 
-func (p *Parser) curTokenIs(tokenType TokenType) bool {
-	return p.currentTok.Type == tokenType
+func (p *parser) curTokenIs(tokType tokenType) bool {
+	return p.currentTok.Type == tokType
 }
 
-func (p *Parser) peekTokenIs(tokenType TokenType) bool {
-	return p.nextTok.Type == tokenType
+func (p *parser) peekTokenIs(tokType tokenType) bool {
+	return p.nextTok.Type == tokType
 }
 
-func (p *Parser) isDoubleBreak() bool {
-	return p.curTokenIs(NEWLINE) && (p.peekTokenIs(NEWLINE) || p.peekTokenIs(EOF))
+func (p *parser) isDoubleBreak() bool {
+	return p.curTokenIs(newline) && (p.peekTokenIs(newline) || p.peekTokenIs(eof))
 }
 
-func (p *Parser) Parse(delim TokenType) ([]Component, error) {
-	elements := make([]Component, 0)
-	var properties []Property
-	var component Component
+func (p *parser) parse(delim tokenType) ([]component, error) {
+	elements := make([]component, 0)
+	var properties []property
+	var component component
 
-	for p.currentTok.Type != delim && p.currentTok.Type != EOF {
-		if p.currentTok.Type == LSQUIRLY {
+	for p.currentTok.Type != delim && p.currentTok.Type != eof {
+		if p.currentTok.Type == lsquirly {
 			var err error
 			properties, err = p.parseProperties()
 			if err != nil {
@@ -77,33 +77,33 @@ func (p *Parser) Parse(delim TokenType) ([]Component, error) {
 	return elements, nil
 }
 
-func (p *Parser) parseComponent(properties []Property, closing TokenType) Component {
-	var component Component
+func (p *parser) parseComponent(properties []property, closing tokenType) component {
+	var component component
 
 	switch p.currentTok.Type {
-	case HASH:
+	case hash:
 		component = p.parseHeader(properties, closing)
-	case WORD:
+	case word:
 		component = p.parseParagraph(properties, closing)
-	case BACKTICK:
+	case backtick:
 		component = p.parseCode(properties, closing)
-	case ASTERISK:
-		if p.peekTokenIs(ASTERISK) {
+	case asterisk:
+		if p.peekTokenIs(asterisk) {
 			component = p.parseStrong(properties, closing)
 		} else {
 			component = p.parseEm(properties, closing)
 		}
-	case GT:
+	case gt:
 		component = p.parseBlockQuote(properties, closing)
-	case LISTELEMENT:
+	case listelement:
 		component = p.parseOrderedListElement(properties, closing)
-	case DASH:
-		if p.peekTokenIs(SPACE) {
+	case dash:
+		if p.peekTokenIs(space) {
 			component = p.parseUnorderedList(properties, closing)
-		} else if p.peekTokenIs(DASH) {
+		} else if p.peekTokenIs(dash) {
 			p.nextToken()
-			if p.peekTokenIs(DASH) {
-				component = &HorizontalRule{Properties: properties}
+			if p.peekTokenIs(dash) {
+				component = &horizontalRule{Properties: properties}
 				p.nextToken()
 			} else {
 				component = p.parseFragment(properties, closing)
@@ -112,17 +112,17 @@ func (p *Parser) parseComponent(properties []Property, closing TokenType) Compon
 		} else {
 			component = p.parseFragment(properties, closing)
 		}
-	case BANG:
-		if p.peekTokenIs(LBRACKET) {
+	case bang:
+		if p.peekTokenIs(lbracket) {
 			component = p.parseImage(properties, closing)
 		} else {
 			component = p.parseFragment(properties, closing)
 		}
-	case UNDERSCORE:
-		if p.peekTokenIs(UNDERSCORE) {
+	case underscore:
+		if p.peekTokenIs(underscore) {
 			p.nextToken()
-			if p.peekTokenIs(UNDERSCORE) {
-				component = &HorizontalRule{Properties: properties}
+			if p.peekTokenIs(underscore) {
+				component = &horizontalRule{Properties: properties}
 				p.nextToken()
 			} else {
 				component = p.parseFragment(properties, closing)
@@ -131,30 +131,30 @@ func (p *Parser) parseComponent(properties []Property, closing TokenType) Compon
 		} else {
 			component = p.parseFragment(properties, closing)
 		}
-	case LBRACKET:
-		if p.peekTokenIs(SPACE) || p.peekTokenIs(NEWLINE) {
+	case lbracket:
+		if p.peekTokenIs(space) || p.peekTokenIs(newline) {
 			component = p.parseDiv(properties, closing)
 		} else {
 			component = p.parseLink(properties, closing)
 		}
-	case LT:
+	case lt:
 		component = p.parseShortLink(properties, closing)
-	case TIDLE:
+	case tidle:
 		component = p.parseButton(properties, closing)
-	case AT:
+	case at:
 		component = p.parseNav(properties, closing)
-	case DOLLAR:
+	case dollar:
 		component = p.parseSpan(properties, closing)
-	case CARET:
-		if p.peekTokenIs(CARET) {
+	case caret:
+		if p.peekTokenIs(caret) {
 			component = p.parseCodeBlock(properties, closing)
 		} else {
 			component = p.parseFragment(properties, closing)
 		}
-	case NEWLINE:
-		component = &LineBreak{}
-	case SLASH:
-		if p.peekTokenIs(SLASH) {
+	case newline:
+		component = &lineBreak{}
+	case slash:
+		if p.peekTokenIs(slash) {
 			p.parseComment()
 		} else {
 			component = p.parseFragment(properties, closing)
@@ -163,7 +163,7 @@ func (p *Parser) parseComponent(properties []Property, closing TokenType) Compon
 
 	// if block component, skip newlines
 	if component != nil && isBlockElement(component) {
-		for p.peekTokenIs(NEWLINE) {
+		for p.peekTokenIs(newline) {
 			p.nextToken()
 		}
 	}
@@ -171,73 +171,73 @@ func (p *Parser) parseComponent(properties []Property, closing TokenType) Compon
 	return component
 }
 
-func isBlockElement(component Component) bool {
-	switch component.(type) {
-	case *Div,
-		*CodeBlock,
-		*HorizontalRule,
-		*Image,
-		*Button,
-		*Nav:
+func isBlockElement(comp component) bool {
+	switch comp.(type) {
+	case *div,
+		*codeBlock,
+		*horizontalRule,
+		*image,
+		*button,
+		*nav:
 		return true
 	}
 	return false
 }
 
-func (p *Parser) parseProperties() ([]Property, error) {
-	props := make([]Property, 0)
-	for !p.curTokenIs(RSQUIRLY) {
-		if p.curTokenIs(DOT) {
-			if !p.peekTokenIs(WORD) {
-				return nil, &ParseError{errorReason: "Property formatted incorrectly. DOT must be followed by a WORD"}
+func (p *parser) parseProperties() ([]property, error) {
+	props := make([]property, 0)
+	for !p.curTokenIs(rsquirly) {
+		if p.curTokenIs(dot) {
+			if !p.peekTokenIs(word) {
+				return nil, &parseError{errorReason: "Property formatted incorrectly. DOT must be followed by a WORD"}
 			}
 
 			p.nextToken()
 			key := p.currentTok.Literal
 
-			if !p.peekTokenIs(EQUALS) {
-				return nil, &ParseError{errorReason: "Property formatted incorrectly. KEY must be follwed by EQUALS"}
+			if !p.peekTokenIs(equals) {
+				return nil, &parseError{errorReason: "Property formatted incorrectly. KEY must be follwed by EQUALS"}
 			}
 
 			p.nextToken()
-			if !p.peekTokenIs(WORD) {
-				return nil, &ParseError{errorReason: "Property formatted incorrectly. EQUALS must be followed by VALUE"}
+			if !p.peekTokenIs(word) {
+				return nil, &parseError{errorReason: "Property formatted incorrectly. EQUALS must be followed by VALUE"}
 			}
 
 			p.nextToken()
 			value := p.currentTok.Literal
 
-			props = append(props, Property{Name: key, Value: value})
+			props = append(props, property{Name: key, Value: value})
 		}
 
 		p.nextToken()
 	}
 
 	p.nextToken()
-	for p.curTokenIs(SPACE) || p.curTokenIs(NEWLINE) {
+	for p.curTokenIs(space) || p.curTokenIs(newline) {
 		p.nextToken()
 	}
 
 	return props, nil
 }
 
-func (p *Parser) parseFragment(properties []Property, closing TokenType) *Fragment {
+func (p *parser) parseFragment(properties []property, closing tokenType) *fragment {
 	content := p.parseTextLine(closing)
-	return &Fragment{String: content}
+	return &fragment{String: content}
 }
 
-func (p *Parser) parseTextLine(closing TokenType) string {
+func (p *parser) parseTextLine(closing tokenType) string {
 	var lineString string
-	for !(p.curTokenIs(NEWLINE) || p.curTokenIs(closing)) {
+	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
 		lineString += p.currentTok.Literal
 		p.nextToken()
 	}
 	return lineString
 }
 
-func (p *Parser) parseTextBlock(closing TokenType) string {
+func (p *parser) parseTextBlock(closing tokenType) string {
 	var blockString string
-	for !(p.curTokenIs(EOF) || p.curTokenIs(closing) || p.peekTokenIs(closing) || p.isDoubleBreak()) {
+	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.peekTokenIs(closing) || p.isDoubleBreak()) {
 		blockString += p.currentTok.Literal
 		p.nextToken()
 	}
@@ -245,103 +245,103 @@ func (p *Parser) parseTextBlock(closing TokenType) string {
 	return blockString
 }
 
-func (p *Parser) parseHeader(props []Property, closing TokenType) Component {
+func (p *parser) parseHeader(props []property, closing tokenType) component {
 	level := 0
-	for p.curTokenIs(HASH) {
+	for p.curTokenIs(hash) {
 		level++
 		p.nextToken()
 	}
 
 	// next token must be space to be a valid header, otherwise just return a <p>
-	if !p.curTokenIs(SPACE) {
+	if !p.curTokenIs(space) {
 		return p.parseFragment(props, closing)
 	}
 
 	p.nextToken()
 	content := p.parseTextLine(closing)
-	return &Header{Level: level, Text: content, Properties: props}
+	return &header{Level: level, Text: content, Properties: props}
 }
 
-func (p *Parser) parseParagraph(props []Property, closing TokenType) Component {
+func (p *parser) parseParagraph(props []property, closing tokenType) component {
 	content := strings.ReplaceAll(p.parseTextBlock(closing), "\\n", " ")
 	if len(content) == 0 {
 		return nil
 	}
 
-	return &Paragraph{Text: content, Properties: props}
+	return &paragraph{Text: content, Properties: props}
 }
 
-func prefixFragment(component Component, prefix string, closing TokenType) {
-	switch c := (component).(type) {
-	case *Fragment:
+func prefixFragment(comp component, prefix string, closing tokenType) {
+	switch c := (comp).(type) {
+	case *fragment:
 		c.String = prefix + c.String
 	}
 }
 
-func (p *Parser) parseCode(properties []Property, closing TokenType) Component {
+func (p *parser) parseCode(properties []property, closing tokenType) component {
 	p.nextToken()
 	var codeString string
 
-	for !p.curTokenIs(BACKTICK) {
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "`" + codeString}
+	for !p.curTokenIs(backtick) {
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "`" + codeString}
 		}
 		codeString += p.currentTok.Literal
 		p.nextToken()
 	}
 
-	return &Code{Properties: properties, Text: codeString}
+	return &code{Properties: properties, Text: codeString}
 }
 
-func (p *Parser) parseStrong(properties []Property, closing TokenType) Component {
+func (p *parser) parseStrong(properties []property, closing tokenType) component {
 	p.nextToken()
-	if p.peekTokenIs(SPACE) || p.peekTokenIs(NEWLINE) || p.peekTokenIs(EOF) {
+	if p.peekTokenIs(space) || p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
-		return &Fragment{String: "*" + content}
+		return &fragment{String: "*" + content}
 	}
 
 	p.nextToken()
 	var strongString string
 
-	for !(p.curTokenIs(ASTERISK) && p.peekTokenIs(ASTERISK)) {
+	for !(p.curTokenIs(asterisk) && p.peekTokenIs(asterisk)) {
 		strongString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			fragment := &Fragment{String: strongString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			fragment := &fragment{String: strongString}
 			prefixFragment(fragment, "**", closing)
 			return fragment
 		}
 	}
 
 	p.nextToken()
-	return &Bold{Properties: properties, Text: strongString}
+	return &bold{Properties: properties, Text: strongString}
 }
 
-func (p *Parser) parseEm(properties []Property, closing TokenType) Component {
-	if p.peekTokenIs(SPACE) || p.peekTokenIs(NEWLINE) || p.peekTokenIs(EOF) {
+func (p *parser) parseEm(properties []property, closing tokenType) component {
+	if p.peekTokenIs(space) || p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
-		return &Fragment{String: content}
+		return &fragment{String: content}
 	}
 
 	p.nextToken()
 	var emString string
 
-	for !p.curTokenIs(ASTERISK) {
+	for !p.curTokenIs(asterisk) {
 		emString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			fragment := &Fragment{String: emString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			fragment := &fragment{String: emString}
 			prefixFragment(fragment, "*", closing)
 			return fragment
 		}
 	}
 
-	return &Italic{Properties: properties, Text: emString}
+	return &italic{Properties: properties, Text: emString}
 }
 
-func (p *Parser) parseBlockQuote(properties []Property, closing TokenType) Component {
+func (p *parser) parseBlockQuote(properties []property, closing tokenType) component {
 	p.nextToken()
 	content := strings.ReplaceAll(p.parseTextBlock(closing), "\\n", "<br/>")
 	content = strings.TrimSpace(content)
@@ -349,92 +349,92 @@ func (p *Parser) parseBlockQuote(properties []Property, closing TokenType) Compo
 		return nil
 	}
 
-	return &BlockQuote{Properties: properties, Text: content}
+	return &blockQuote{Properties: properties, Text: content}
 }
 
-func (p *Parser) parseOrderedListElement(properties []Property, closing TokenType) Component {
+func (p *parser) parseOrderedListElement(properties []property, closing tokenType) component {
 	start, parseErr := strconv.Atoi(strings.TrimSuffix(p.currentTok.Literal, "."))
 	if parseErr != nil {
 		start = 1
 	}
 
-	listElements := make([]ListItem, 0)
-	for !(p.curTokenIs(EOF) || (p.curTokenIs(NEWLINE) && !p.peekTokenIs(LISTELEMENT))) {
+	listElements := make([]listItem, 0)
+	for !(p.curTokenIs(eof) || (p.curTokenIs(newline) && !p.peekTokenIs(listelement))) {
 		p.nextToken()
-		if p.curTokenIs(LISTELEMENT) {
+		if p.curTokenIs(listelement) {
 			p.nextToken()
 		}
 		elementContent := strings.TrimSpace(p.parseTextLine(closing))
-		element := ListItem{Component: &Paragraph{Text: elementContent}}
+		element := listItem{Component: &paragraph{Text: elementContent}}
 		listElements = append(listElements, element)
 	}
 
-	return &OrderedList{Properties: properties, ListItems: listElements, Start: start}
+	return &orderedList{Properties: properties, ListItems: listElements, Start: start}
 }
 
-func (p *Parser) parseUnorderedList(properties []Property, closing TokenType) Component {
-	listElements := make([]ListItem, 0)
-	for !(p.curTokenIs(EOF) || (p.curTokenIs(NEWLINE) && !p.peekTokenIs(DASH))) {
+func (p *parser) parseUnorderedList(properties []property, closing tokenType) component {
+	listElements := make([]listItem, 0)
+	for !(p.curTokenIs(eof) || (p.curTokenIs(newline) && !p.peekTokenIs(dash))) {
 		p.nextToken()
-		if p.curTokenIs(DASH) {
-			if !p.peekTokenIs(SPACE) {
-				return &UnorderedList{Properties: properties, ListItems: listElements}
+		if p.curTokenIs(dash) {
+			if !p.peekTokenIs(space) {
+				return &unorderedList{Properties: properties, ListItems: listElements}
 			}
 
 			p.nextToken()
 		}
 
 		elementContent := strings.TrimSpace(p.parseTextLine(closing))
-		element := ListItem{Component: &Paragraph{Text: elementContent}}
+		element := listItem{Component: &paragraph{Text: elementContent}}
 		listElements = append(listElements, element)
 	}
 
-	return &UnorderedList{Properties: properties, ListItems: listElements}
+	return &unorderedList{Properties: properties, ListItems: listElements}
 }
 
-func (p *Parser) parseImage(properties []Property, closing TokenType) Component {
+func (p *parser) parseImage(properties []property, closing tokenType) component {
 	p.nextToken()
 	p.nextToken()
 
 	var altText string
-	for !p.curTokenIs(RBRACKET) {
+	for !p.curTokenIs(rbracket) {
 		altText += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "![" + altText}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "![" + altText}
 		}
 	}
 
-	if !p.peekTokenIs(LPAREN) {
-		return &Fragment{String: "![" + altText + "]"}
+	if !p.peekTokenIs(lparen) {
+		return &fragment{String: "![" + altText + "]"}
 	}
 
 	p.nextToken()
 	p.nextToken()
 
 	var urlString string
-	for !p.curTokenIs(RPAREN) {
+	for !p.curTokenIs(rparen) {
 		urlString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "![" + altText + "](" + urlString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "![" + altText + "](" + urlString}
 		}
 	}
 
-	return &Image{Properties: properties, ImgUrl: urlString, AltText: altText}
+	return &image{Properties: properties, ImgUrl: urlString, AltText: altText}
 }
 
-func (p *Parser) parseDiv(properties []Property, closing TokenType) Component {
-	children := make([]Component, 0)
+func (p *parser) parseDiv(properties []property, closing tokenType) component {
+	children := make([]component, 0)
 
 	p.nextToken()
-	for p.curTokenIs(NEWLINE) {
+	for p.curTokenIs(newline) {
 		p.nextToken()
 	}
 
-	components, err := p.Parse(RBRACKET)
+	components, err := p.parse(rbracket)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -443,151 +443,151 @@ func (p *Parser) parseDiv(properties []Property, closing TokenType) Component {
 		children = append(children, component)
 	}
 
-	if p.peekTokenIs(NEWLINE) {
+	if p.peekTokenIs(newline) {
 		p.nextToken()
 	}
 
-	return &Div{Properties: properties, Children: children}
+	return &div{Properties: properties, Children: children}
 }
 
-func (p *Parser) parseLink(properties []Property, closing TokenType) Component {
+func (p *parser) parseLink(properties []property, closing tokenType) component {
 	p.nextToken()
 
 	var displayText string
-	for !p.curTokenIs(RBRACKET) {
+	for !p.curTokenIs(rbracket) {
 		displayText += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "[" + displayText}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "[" + displayText}
 		}
 	}
 
-	if !p.peekTokenIs(LPAREN) {
-		return &Fragment{String: "[" + displayText + "]"}
+	if !p.peekTokenIs(lparen) {
+		return &fragment{String: "[" + displayText + "]"}
 	}
 
 	p.nextToken()
 	p.nextToken()
 
 	var urlString string
-	for !p.curTokenIs(RPAREN) {
+	for !p.curTokenIs(rparen) {
 		urlString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "[" + displayText + "](" + urlString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "[" + displayText + "](" + urlString}
 		}
 	}
 
-	return &Link{Properties: properties, Url: urlString, Text: displayText}
+	return &link{Properties: properties, Url: urlString, Text: displayText}
 }
 
-func (p *Parser) parseShortLink(properties []Property, closing TokenType) Component {
+func (p *parser) parseShortLink(properties []property, closing tokenType) component {
 	p.nextToken()
 
 	var urlString string
-	for !p.curTokenIs(GT) {
+	for !p.curTokenIs(gt) {
 		urlString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "<" + urlString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "<" + urlString}
 		}
 	}
 
-	return &Link{Properties: properties, Url: urlString, Text: urlString}
+	return &link{Properties: properties, Url: urlString, Text: urlString}
 }
 
-func (p *Parser) parseButton(properties []Property, closing TokenType) Component {
+func (p *parser) parseButton(properties []property, closing tokenType) component {
 	p.nextToken()
 	p.nextToken()
 
 	var buttonLabel string
-	for !p.curTokenIs(RBRACKET) {
+	for !p.curTokenIs(rbracket) {
 		buttonLabel += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "~[" + buttonLabel}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "~[" + buttonLabel}
 		}
 	}
 
-	if !p.peekTokenIs(LPAREN) {
-		return &Fragment{String: "~[" + buttonLabel + "]"}
+	if !p.peekTokenIs(lparen) {
+		return &fragment{String: "~[" + buttonLabel + "]"}
 	}
 
 	p.nextToken()
 	p.nextToken()
 
 	var onClick string
-	for !p.curTokenIs(RPAREN) {
+	for !p.curTokenIs(rparen) {
 		onClick += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			return &Fragment{String: "~[" + buttonLabel + "](" + onClick}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			return &fragment{String: "~[" + buttonLabel + "](" + onClick}
 		}
 	}
 
-	return &Button{Properties: properties, OnClick: onClick, Child: &Fragment{String: buttonLabel}}
+	return &button{Properties: properties, OnClick: onClick, Child: &fragment{String: buttonLabel}}
 }
 
-func (p *Parser) parseNav(properties []Property, closing TokenType) Component {
-	children := make([]Component, 0)
+func (p *parser) parseNav(properties []property, closing tokenType) component {
+	children := make([]component, 0)
 
 	p.nextToken()
-	components, err := p.Parse(AT)
+	components, err := p.parse(at)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	for _, component := range components {
 		// don't put line breaks in nav element
-		if _, ok := component.(*LineBreak); !ok {
+		if _, ok := component.(*lineBreak); !ok {
 			children = append(children, component)
 		}
 	}
 
-	return &Nav{Properties: properties, Children: children}
+	return &nav{Properties: properties, Children: children}
 }
 
-func (p *Parser) parseSpan(properties []Property, closing TokenType) Component {
-	if p.peekTokenIs(NEWLINE) || p.peekTokenIs(EOF) {
+func (p *parser) parseSpan(properties []property, closing tokenType) component {
+	if p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
-		return &Fragment{String: content}
+		return &fragment{String: content}
 	}
 
 	p.nextToken()
 	var spanString string
 
-	for !p.curTokenIs(DOLLAR) {
+	for !p.curTokenIs(dollar) {
 		spanString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(NEWLINE) || p.curTokenIs(EOF) {
-			fragment := &Fragment{String: spanString}
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			fragment := &fragment{String: spanString}
 			prefixFragment(fragment, "$", closing)
 			return fragment
 		}
 	}
 
-	children := []Component{&Fragment{String: strings.TrimSpace(spanString)}}
+	children := []component{&fragment{String: strings.TrimSpace(spanString)}}
 
-	return &Span{Properties: properties, Children: children}
+	return &span{Properties: properties, Children: children}
 }
 
-func (p *Parser) parseCodeBlock(properties []Property, closing TokenType) Component {
+func (p *parser) parseCodeBlock(properties []property, closing tokenType) component {
 	p.nextToken()
 	p.nextToken()
 
 	var codeBlockString string
-	for !(p.curTokenIs(CARET) && p.peekTokenIs(CARET)) {
+	for !(p.curTokenIs(caret) && p.peekTokenIs(caret)) {
 		codeBlockString += p.currentTok.Literal
 		p.nextToken()
 
-		if p.curTokenIs(EOF) {
-			fragment := &Fragment{String: "^^" + codeBlockString}
+		if p.curTokenIs(eof) {
+			fragment := &fragment{String: "^^" + codeBlockString}
 			return fragment
 		}
 	}
@@ -596,11 +596,11 @@ func (p *Parser) parseCodeBlock(properties []Property, closing TokenType) Compon
 	codeBlockString = strings.ReplaceAll(codeBlockString, "\\t", "    ")
 	codeBlockString = strings.TrimPrefix(codeBlockString, "\\n")
 	codeBlockString = strings.TrimSuffix(codeBlockString, "\\n")
-	return &CodeBlock{Properties: properties, Content: codeBlockString}
+	return &codeBlock{Properties: properties, Content: codeBlockString}
 }
 
-func (p *Parser) parseComment() {
-	for !p.curTokenIs(NEWLINE) {
+func (p *parser) parseComment() {
+	for !p.curTokenIs(newline) {
 		p.nextToken()
 	}
 }

@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-type InvalidFileError struct {
+type invalidFileError struct {
 	error
 }
 
-func (e *InvalidFileError) Error() string {
+func (e *invalidFileError) Error() string {
 	return "Invalid file type. File must have .md or .mdx extension"
 }
 
@@ -28,7 +28,7 @@ func (e *InvalidFileError) Error() string {
 
 func Transform(inputFilename string) (string, error) {
 	if !(strings.HasSuffix(inputFilename, ".md") || strings.HasSuffix(inputFilename, ".mdx")) {
-		return "", &InvalidFileError{}
+		return "", &invalidFileError{}
 	}
 
 	data, readErr := os.ReadFile(inputFilename)
@@ -36,22 +36,22 @@ func Transform(inputFilename string) (string, error) {
 		return "", readErr
 	}
 
-	lexer := NewLexer(string(data))
-	parser := NewParser(lexer)
-	elements, parseErr := parser.Parse(EOF)
+	lexer := newLexer(string(data))
+	parser := newParser(lexer)
+	elements, parseErr := parser.parse(eof)
 
 	if parseErr != nil {
 		return "", parseErr
 	}
 
-	htmlString := TransformMDX(elements)
+	htmlString := transformMDX(elements)
 
 	return htmlString, nil
 }
 
 func Generate(config *GeneratorConfig) (int, error) {
 	if !(strings.HasSuffix(config.InputFilename, ".md") || strings.HasSuffix(config.InputFilename, ".mdx")) {
-		return 0, &InvalidFileError{}
+		return 0, &invalidFileError{}
 	}
 
 	data, readErr := os.ReadFile(config.InputFilename)
@@ -59,15 +59,15 @@ func Generate(config *GeneratorConfig) (int, error) {
 		return 0, readErr
 	}
 
-	lexer := NewLexer(string(data))
-	parser := NewParser(lexer)
-	elements, parseErr := parser.Parse(EOF)
+	lexer := newLexer(string(data))
+	parser := newParser(lexer)
+	elements, parseErr := parser.parse(eof)
 
 	if parseErr != nil {
 		return 0, parseErr
 	}
 
-	n, err := GenerateHtml(elements, config)
+	n, err := generateHtml(elements, config)
 
 	return n, err
 }

@@ -18,9 +18,9 @@ func TestParseProperties(t *testing.T) {
 
 func TestParseCode(t *testing.T) {
 	input := "`print('Hello, world!')`"
-	lex := NewLexer(input)
-	parser := NewParser(lex)
-	elements, parseErr := parser.Parse(EOF)
+	lex := newLexer(input)
+	parser := newParser(lex)
+	elements, parseErr := parser.parse(eof)
 	if parseErr != nil {
 		t.Errorf("Code parse failed: %s", parseErr.Error())
 	}
@@ -30,7 +30,7 @@ func TestParseCode(t *testing.T) {
 	}
 
 	element := elements[0]
-	if code, ok := element.(*Code); ok {
+	if code, ok := element.(*code); ok {
 		if code.Text != "print('Hello, world!')" {
 			t.Errorf("Code parse failed: Content incorrect, got=%s", code.Text)
 		}
@@ -39,9 +39,9 @@ func TestParseCode(t *testing.T) {
 	}
 
 	input = "`print('Hello, world!')"
-	lex = NewLexer(input)
-	parser = NewParser(lex)
-	elements, parseErr = parser.Parse(EOF)
+	lex = newLexer(input)
+	parser = newParser(lex)
+	elements, parseErr = parser.parse(eof)
 	if parseErr != nil {
 		t.Errorf("Code parse failed: %s", parseErr.Error())
 	}
@@ -51,7 +51,7 @@ func TestParseCode(t *testing.T) {
 	}
 
 	element = elements[0]
-	if frag, ok := element.(*Fragment); ok {
+	if frag, ok := element.(*fragment); ok {
 		if frag.String != input {
 			t.Errorf("Invalid code parse failed: Got fragment with string %s", frag.String)
 		}
@@ -64,9 +64,9 @@ func TestParseDiv(t *testing.T) {
 	input := `[
     Hello
 ]`
-	lex := NewLexer(input)
-	parser := NewParser(lex)
-	elements, parseErr := parser.Parse(EOF)
+	lex := newLexer(input)
+	parser := newParser(lex)
+	elements, parseErr := parser.parse(eof)
 	if parseErr != nil {
 		t.Errorf("Div parse failed: %s", parseErr.Error())
 	}
@@ -76,7 +76,7 @@ func TestParseDiv(t *testing.T) {
 	}
 
 	element := elements[0]
-	if div, ok := element.(*Div); ok {
+	if div, ok := element.(*div); ok {
 		if len(div.Children) != 1 {
 			t.Errorf("Div parse failed: Exected one child, got=%d", len(div.Children))
 		}
@@ -89,9 +89,9 @@ func TestParseDiv(t *testing.T) {
 ]
 
 `
-	lex = NewLexer(input)
-	parser = NewParser(lex)
-	elements, parseErr = parser.Parse(EOF)
+	lex = newLexer(input)
+	parser = newParser(lex)
+	elements, parseErr = parser.parse(eof)
 	if parseErr != nil {
 		t.Errorf("Div parse failed: %s", parseErr.Error())
 	}
@@ -101,7 +101,7 @@ func TestParseDiv(t *testing.T) {
 	}
 
 	element = elements[0]
-	if div, ok := element.(*Div); ok {
+	if div, ok := element.(*div); ok {
 		if len(div.Children) != 1 {
 			t.Errorf("Div parse failed: Exected one child, got=%d", len(div.Children))
 		}

@@ -13,15 +13,15 @@ type GeneratorConfig struct {
 	Links          []map[string]string
 }
 
-func TransformMDX(elements []Component) string {
+func transformMDX(elements []component) string {
 	// Note: Testing changing from body to div and putting more in the template.html
 	// body := &Body{Children: elements}
-	body := &Div{Children: elements}
-	htmlString := body.Html()
+	body := &div{Children: elements}
+	htmlString := body.html()
 	return htmlString
 }
 
-func GenerateHtml(elements []Component, config *GeneratorConfig) (int, error) {
+func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 	file, fileErr := os.OpenFile(config.OutputFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if fileErr != nil {
 		log.Fatal(fileErr.Error())
@@ -55,7 +55,7 @@ func GenerateHtml(elements []Component, config *GeneratorConfig) (int, error) {
     </head>
 `)
 
-	body := &Body{Children: elements}
+	body := &body{Children: elements}
 	n, writeErr := file.WriteString(body.Html())
 	if writeErr != nil {
 		log.Fatal(writeErr.Error())
