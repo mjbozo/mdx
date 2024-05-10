@@ -12,9 +12,6 @@ type Token struct {
 }
 
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-
 	HASH        = "#"
 	ASTERISK    = "*"
 	BACKTICK    = "`"
@@ -42,9 +39,10 @@ const (
 	BACKSLASH = "\\"
 	NEWLINE   = "\\n"
 	TAB       = "\\t"
-	SPACE     = "SPACE"
 
-	WORD = "WORD"
+	SPACE = "SPACE"
+	WORD  = "WORD"
+	EOF   = "EOF"
 )
 
 func NewToken(t TokenType, literal string) Token {
