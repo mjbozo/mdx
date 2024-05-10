@@ -26,6 +26,9 @@ func (e *invalidFileError) Error() string {
 // TODO: Should be able to have <code> blocks inside <p> tags
 // TODO: Unordered lists should ignore all whitespace between list components
 
+// Transform .mdx or .md file into HTML string.
+// On successful transformation, returns string representing HTML and nil error.
+// On failure returns empty string with non nil error.
 func Transform(inputFilename string) (string, error) {
 	if !(strings.HasSuffix(inputFilename, ".md") || strings.HasSuffix(inputFilename, ".mdx")) {
 		return "", &invalidFileError{}
@@ -49,6 +52,9 @@ func Transform(inputFilename string) (string, error) {
 	return htmlString, nil
 }
 
+// Generates HTML file based on the given configuration object.
+// On successful generation, returns number of bytes written to file and nil error.
+// On failure returns bytes written with non nil error.
 func Generate(config *GeneratorConfig) (int, error) {
 	if !(strings.HasSuffix(config.InputFilename, ".md") || strings.HasSuffix(config.InputFilename, ".mdx")) {
 		return 0, &invalidFileError{}

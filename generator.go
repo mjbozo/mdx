@@ -24,7 +24,8 @@ func transformMDX(elements []component) string {
 func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 	file, fileErr := os.OpenFile(config.OutputFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if fileErr != nil {
-		log.Fatal(fileErr.Error())
+		log.Println(fileErr.Error())
+		return 0, fileErr
 	}
 
 	defer file.Close()
@@ -58,7 +59,8 @@ func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 	body := &body{Children: elements}
 	n, writeErr := file.WriteString(body.Html())
 	if writeErr != nil {
-		log.Fatal(writeErr.Error())
+		log.Printf(writeErr.Error())
+		return n, writeErr
 	}
 
 	file.WriteString(`

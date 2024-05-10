@@ -81,6 +81,7 @@ Paragraph section
 		{backslash, "\\"},
 		{rparen, ")"},
 		{backtick, "`"},
+		{eof, ""},
 	}
 
 	l := newLexer(input)
