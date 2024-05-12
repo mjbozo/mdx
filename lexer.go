@@ -110,18 +110,18 @@ func isWhitespace(ch byte) bool {
 }
 
 func isClosingPair(ch byte) bool {
-	return ch == ']' || ch == ')' || ch == '>' || ch == '*' || ch == '`'
+	return ch == ']' || ch == ')' || ch == '>' || ch == '*' || ch == '`' || ch == '$' || ch == '^'
 }
 
 func (l *lexer) readWord() string {
 	position := l.position
-	for !isWhitespace(l.ch) && !isClosingPair(l.ch) && l.ch != '=' {
+	for !isWhitespace(l.ch) && !isClosingPair(l.ch) && l.ch != '=' && l.ch != 0 {
 		l.readChar()
 	}
 	return l.input[position:l.position]
 }
 
-func (l *lexer) isLetter(ch byte) bool {
+func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch == '-'
 }
 

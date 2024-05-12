@@ -17,7 +17,11 @@ func transformMDX(elements []component) string {
 	// Note: Testing changing from body to div and putting more in the template.html
 	// body := &Body{Children: elements}
 	body := &div{Children: elements}
-	htmlString := body.html()
+	htmlString := body.Html()
+	// var htmlString string
+	// for _, element := range elements {
+	// 	htmlString += element.html()
+	// }
 	return htmlString
 }
 

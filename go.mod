@@ -1,3 +1,3 @@
-module github.com/matt-bourke/mdx
+module github.com/mjbozo/mdx
 
 go 1.22

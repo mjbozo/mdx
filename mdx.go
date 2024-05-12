@@ -15,6 +15,7 @@ func (e *invalidFileError) Error() string {
 
 // TODO: HTML Formatting
 // TODO: Code block formatting
+// TODO: Consolidation / cleanup step after AST first built
 // TODO: Ordered list only parses when list starts with single digit number
 // TODO: Format HTML correctly when generating file
 // TODO: Blockquote are not able to be nested at the moment

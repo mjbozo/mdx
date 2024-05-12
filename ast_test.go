@@ -16,14 +16,14 @@ func defaultProps(t *testing.T) []property {
 
 func TestFragment(t *testing.T) {
 	fragment := fragment{}
-	fragmentHtml := fragment.html()
+	fragmentHtml := fragment.Html()
 	expected := ""
 	if fragmentHtml != expected {
 		t.Errorf("Fragment wrong, got=%q", fragmentHtml)
 	}
 
 	fragment.String = "Hello"
-	fragmentHtml = fragment.html()
+	fragmentHtml = fragment.Html()
 	expected = "Hello"
 	if fragmentHtml != expected {
 		t.Errorf("Fragment wrong, got=%q", fragmentHtml)
@@ -31,23 +31,23 @@ func TestFragment(t *testing.T) {
 }
 
 func TestHeader(t *testing.T) {
-	h1 := header{Level: 1, Text: "Test"}
-	headerHtml := h1.html()
+	h1 := header{Level: 1, Content: []component{&fragment{String: "Test"}}}
+	headerHtml := h1.Html()
 	expected := "<h1>Test</h1>"
 	if headerHtml != expected {
 		t.Errorf("Header wrong, got=%q", headerHtml)
 	}
 
-	h1 = header{Level: 2, Text: "Test2"}
-	headerHtml = h1.html()
+	h1 = header{Level: 2, Content: []component{&fragment{String: "Test2"}}}
+	headerHtml = h1.Html()
 	expected = "<h2>Test2</h2>"
 	if headerHtml != expected {
 		t.Errorf("Header wrong, got=%q", headerHtml)
 	}
 
 	properties := defaultProps(t)
-	h1 = header{Level: 6, Text: "Test with Props", Properties: properties}
-	headerHtml = h1.html()
+	h1 = header{Level: 6, Content: []component{&fragment{String: "Test with Props"}}, Properties: properties}
+	headerHtml = h1.Html()
 	expected = "<h6 class=\"test\" style=\"background-color: red\">Test with Props</h6>"
 	if headerHtml != expected {
 		t.Errorf("Header wrong, got=%q", headerHtml)
@@ -55,8 +55,8 @@ func TestHeader(t *testing.T) {
 }
 
 func TestParagraph(t *testing.T) {
-	paragraph := paragraph{Text: "Paragraph test"}
-	paragraphHtml := paragraph.html()
+	paragraph := paragraph{Content: []component{&fragment{String: "Paragraph test"}}}
+	paragraphHtml := paragraph.Html()
 	expected := "<p>Paragraph test</p>"
 	if paragraphHtml != expected {
 		t.Errorf("Paragraph wrong, got=%q", paragraphHtml)
@@ -65,14 +65,14 @@ func TestParagraph(t *testing.T) {
 
 func TestCode(t *testing.T) {
 	code := code{Text: "fmt.Printf(\"Hello, world!\n\")"}
-	codeHtml := code.html()
+	codeHtml := code.Html()
 	expected := "<code>fmt.Printf(\"Hello, world!\n\")</code>"
 	if codeHtml != expected {
 		t.Errorf("Code wrong, got=%q", codeHtml)
 	}
 
 	code.Properties = defaultProps(t)
-	codeHtml = code.html()
+	codeHtml = code.Html()
 	expected = "<code class=\"test\" style=\"background-color: red\">fmt.Printf(\"Hello, world!\n\")</code>"
 	if codeHtml != expected {
 		t.Errorf("Code properties wrong, got=%q", codeHtml)
@@ -81,14 +81,14 @@ func TestCode(t *testing.T) {
 
 func TestBold(t *testing.T) {
 	bold := bold{Text: "stronk"}
-	boldHtml := bold.html()
+	boldHtml := bold.Html()
 	expected := "<strong>stronk</strong>"
 	if boldHtml != expected {
 		t.Errorf("Bold wrong, got=%q", boldHtml)
 	}
 
 	bold.Properties = defaultProps(t)
-	boldHtml = bold.html()
+	boldHtml = bold.Html()
 	expected = "<strong class=\"test\" style=\"background-color: red\">stronk</strong>"
 	if boldHtml != expected {
 		t.Errorf("Bold properties wrong, got=%q", boldHtml)
@@ -97,14 +97,14 @@ func TestBold(t *testing.T) {
 
 func TestItalic(t *testing.T) {
 	italic := italic{Text: "italian"}
-	italicHtml := italic.html()
+	italicHtml := italic.Html()
 	expected := "<em>italian</em>"
 	if italicHtml != expected {
 		t.Errorf("Italic wrong, got=%q", italicHtml)
 	}
 
 	italic.Properties = defaultProps(t)
-	italicHtml = italic.html()
+	italicHtml = italic.Html()
 	expected = "<em class=\"test\" style=\"background-color: red\">italian</em>"
 	if italicHtml != expected {
 		t.Errorf("Italic properties wrong, got=%q", italicHtml)
@@ -113,14 +113,14 @@ func TestItalic(t *testing.T) {
 
 func TestBlockQuote(t *testing.T) {
 	blockquote := blockQuote{Text: "quote"}
-	blockquoteHtml := blockquote.html()
+	blockquoteHtml := blockquote.Html()
 	expected := "<blockquote>quote</blockquote>"
 	if blockquoteHtml != expected {
 		t.Errorf("Blockquote wrong, got=%q", blockquoteHtml)
 	}
 
 	blockquote.Properties = defaultProps(t)
-	blockquoteHtml = blockquote.html()
+	blockquoteHtml = blockquote.Html()
 	expected = "<blockquote class=\"test\" style=\"background-color: red\">quote</blockquote>"
 	if blockquoteHtml != expected {
 		t.Errorf("Blockquote properties wrong, got=%q", blockquoteHtml)
@@ -128,7 +128,7 @@ func TestBlockQuote(t *testing.T) {
 }
 
 func TestListItem(t *testing.T) {
-	listItem := listItem{Component: &paragraph{Text: "Item #1"}}
+	listItem := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
 	listItemHtml := listItem.Html()
 	expected := "<li><p>Item #1</p></li>"
 	if listItemHtml != expected {
@@ -144,11 +144,11 @@ func TestListItem(t *testing.T) {
 }
 
 func TestOrderedList(t *testing.T) {
-	listItem1 := listItem{Component: &paragraph{Text: "Item #1"}}
-	listItem2 := listItem{Component: &paragraph{Text: "Item #2"}}
+	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
+	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
 	list := orderedList{ListItems: listItems, Start: 1}
-	listHtml := list.html()
+	listHtml := list.Html()
 	expected := "<ol start=\"1\">\n    <li><p>Item #1</p></li>\n    <li><p>Item #2</p></li>\n</ol>"
 	if listHtml != expected {
 		t.Errorf("OrderedList wrong, got=%q", listHtml)
@@ -156,7 +156,7 @@ func TestOrderedList(t *testing.T) {
 
 	list.Properties = defaultProps(t)
 	list.Start = 5
-	listHtml = list.html()
+	listHtml = list.Html()
 	expected = "<ol start=\"5\" class=\"test\" style=\"background-color: red\">\n    <li><p>Item #1</p></li>\n    <li><p>Item #2</p></li>\n</ol>"
 	if listHtml != expected {
 		t.Errorf("OrderedList properties wrong, got=%q", listHtml)
@@ -164,18 +164,18 @@ func TestOrderedList(t *testing.T) {
 }
 
 func TestUnorderedList(t *testing.T) {
-	listItem1 := listItem{Component: &paragraph{Text: "Item #1"}}
-	listItem2 := listItem{Component: &paragraph{Text: "Item #2"}}
+	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
+	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
 	list := unorderedList{ListItems: listItems}
-	listHtml := list.html()
+	listHtml := list.Html()
 	expected := "<ul>\n    <li><p>Item #1</p></li>\n    <li><p>Item #2</p></li>\n</ul>"
 	if listHtml != expected {
 		t.Errorf("UnorderedList wrong, got=%q", listHtml)
 	}
 
 	list.Properties = defaultProps(t)
-	listHtml = list.html()
+	listHtml = list.Html()
 	expected = "<ul class=\"test\" style=\"background-color: red\">\n    <li><p>Item #1</p></li>\n    <li><p>Item #2</p></li>\n</ul>"
 	if listHtml != expected {
 		t.Errorf("UnorderedList properties wrong, got=%q", listHtml)
@@ -184,27 +184,27 @@ func TestUnorderedList(t *testing.T) {
 
 func TestImage(t *testing.T) {
 	img := image{ImgUrl: "https://img.pokemondb.net/artwork/avif/regirock.avif", AltText: "Reginald"}
-	imgHtml := img.html()
+	imgHtml := img.Html()
 	expected := "<img src=\"https://img.pokemondb.net/artwork/avif/regirock.avif\" alt=\"Reginald\"/>"
 	if imgHtml != expected {
 		t.Errorf("Image wrong, got=%q", imgHtml)
 	}
 
 	img.Properties = defaultProps(t)
-	imgHtml = img.html()
+	imgHtml = img.Html()
 	expected = "<img class=\"test\" style=\"background-color: red\" src=\"https://img.pokemondb.net/artwork/avif/regirock.avif\" alt=\"Reginald\"/>"
 }
 
 func TestHorizontalRule(t *testing.T) {
 	rule := horizontalRule{}
-	ruleHtml := rule.html()
+	ruleHtml := rule.Html()
 	expected := "<hr/>"
 	if ruleHtml != expected {
 		t.Errorf("HorizontalRule wrong, got=%q", ruleHtml)
 	}
 
 	rule.Properties = defaultProps(t)
-	ruleHtml = rule.html()
+	ruleHtml = rule.Html()
 	expected = "<hr class=\"test\" style=\"background-color: red\"/>"
 	if ruleHtml != expected {
 		t.Errorf("HorizontalRule properties wrong, got=%q", ruleHtml)
@@ -213,14 +213,14 @@ func TestHorizontalRule(t *testing.T) {
 
 func TestLink(t *testing.T) {
 	link := link{Url: "https://google.com", Text: "Google"}
-	linkHtml := link.html()
+	linkHtml := link.Html()
 	expected := "<a href=\"https://google.com\">Google</a>"
 	if linkHtml != expected {
 		t.Errorf("Link wrong, got=%q", linkHtml)
 	}
 
 	link.Properties = defaultProps(t)
-	linkHtml = link.html()
+	linkHtml = link.Html()
 	expected = "<a class=\"test\" style=\"background-color: red\" href=\"https://google.com\">Google</a>"
 	if linkHtml != expected {
 		t.Errorf("Link properties wrong, got=%q", linkHtml)
@@ -228,15 +228,15 @@ func TestLink(t *testing.T) {
 }
 
 func TestButton(t *testing.T) {
-	button := button{OnClick: "handleClick", Child: &paragraph{Text: "Click Me"}}
-	buttonHtml := button.html()
+	button := button{OnClick: "handleClick", Child: &paragraph{Content: []component{&fragment{String: "Click Me"}}}}
+	buttonHtml := button.Html()
 	expected := "<button onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
 	if buttonHtml != expected {
 		t.Errorf("Button wrong, got=%q", buttonHtml)
 	}
 
 	button.Properties = defaultProps(t)
-	buttonHtml = button.html()
+	buttonHtml = button.Html()
 	expected = "<button class=\"test\" style=\"background-color: red\" onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
 	if buttonHtml != expected {
 		t.Errorf("Button properties wrong, got=%q", buttonHtml)
@@ -245,7 +245,7 @@ func TestButton(t *testing.T) {
 
 func TestDiv(t *testing.T) {
 	emptyDiv := div{}
-	divHtml := emptyDiv.html()
+	divHtml := emptyDiv.Html()
 	expected := "<div/>"
 	if divHtml != expected {
 		t.Errorf("Empty Div wrong, got=%q", divHtml)
@@ -253,15 +253,15 @@ func TestDiv(t *testing.T) {
 
 	properties := defaultProps(t)
 	propertyDiv := div{Properties: properties}
-	divHtml = propertyDiv.html()
+	divHtml = propertyDiv.Html()
 	expected = "<div class=\"test\" style=\"background-color: red\"/>"
 	if divHtml != expected {
 		t.Errorf("Property Div wrong, got=%q", divHtml)
 	}
 
-	p := &paragraph{Text: "child"}
+	p := &paragraph{Content: []component{&fragment{String: "child"}}}
 	childDiv := div{Children: []component{p}}
-	divHtml = childDiv.html()
+	divHtml = childDiv.Html()
 	expected = "<div>\n    <p>child</p>\n</div>"
 	if divHtml != expected {
 		t.Errorf("Child div wrong, got=%q", divHtml)
@@ -270,21 +270,21 @@ func TestDiv(t *testing.T) {
 
 func TestNav(t *testing.T) {
 	nav := nav{}
-	navHtml := nav.html()
+	navHtml := nav.Html()
 	expected := "<nav/>"
 	if navHtml != expected {
 		t.Errorf("Empty nav wrong, got=%q", navHtml)
 	}
 
 	nav.Properties = defaultProps(t)
-	navHtml = nav.html()
+	navHtml = nav.Html()
 	expected = "<nav class=\"test\" style=\"background-color: red\"/>"
 	if navHtml != expected {
 		t.Errorf("Nav properties wrong, got=%q", navHtml)
 	}
 
 	nav.Children = []component{&link{Url: "https://test.com", Text: "Test"}}
-	navHtml = nav.html()
+	navHtml = nav.Html()
 	expected = "<nav class=\"test\" style=\"background-color: red\">\n    <a href=\"https://test.com\">Test</a>\n</nav>"
 	if navHtml != expected {
 		t.Errorf("Nav children wrong, got=%q", navHtml)
@@ -293,15 +293,15 @@ func TestNav(t *testing.T) {
 
 func TestSpan(t *testing.T) {
 	span := span{}
-	spanHtml := span.html()
+	spanHtml := span.Html()
 	expected := "<span/>"
 	if spanHtml != expected {
 		t.Errorf("Span wrong, got=%q", spanHtml)
 	}
 
-	span.Children = []component{&paragraph{Text: "Hello"}}
-	spanHtml = span.html()
-	expected = "<span>\n    <p>Hello</p>\n</span>"
+	span.Children = []component{&paragraph{Content: []component{&fragment{String: "Hello"}}}}
+	spanHtml = span.Html()
+	expected = "<span><p>Hello</p></span>"
 	if spanHtml != expected {
 		t.Errorf("Span children wrong, got=%q", spanHtml)
 	}
@@ -310,7 +310,7 @@ func TestSpan(t *testing.T) {
 func TestCodeBlock(t *testing.T) {
 	content := `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, world!")\n}`
 	codeBlock := codeBlock{Content: content}
-	codeBlockHtml := codeBlock.html()
+	codeBlockHtml := codeBlock.Html()
 	expected := `<div class="code-block">
     <pre>package main</pre>
     <pre></pre>

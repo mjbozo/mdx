@@ -52,3 +52,22 @@ func newToken(t tokenType, literal string) token {
 func (t *token) String() string {
 	return fmt.Sprintf("Token [ Type=%s, Literal=%s ]\n", t.Type, t.Literal)
 }
+
+func (t *token) IsElementToken() bool {
+	switch t.Type {
+	case hash,
+		asterisk,
+		bang,
+		gt,
+		dash,
+		listelement,
+		lbracket,
+		tidle,
+		caret,
+		dollar,
+		at:
+		return true
+	}
+
+	return false
+}

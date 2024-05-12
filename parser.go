@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// TODO: Properly handle nested components
+
 type parser struct {
 	l          *lexer
 	currentTok token
@@ -33,8 +35,8 @@ func (p *parser) nextToken() {
 	p.nextTok = p.l.nextToken()
 }
 
-func (p *parser) peekToken() token {
-	return p.nextTok
+func (p *parser) peekToken() *token {
+	return &p.nextTok
 }
 
 func (p *parser) curTokenIs(tokType tokenType) bool {
@@ -49,6 +51,14 @@ func (p *parser) isDoubleBreak() bool {
 	return p.curTokenIs(newline) && (p.peekTokenIs(newline) || p.peekTokenIs(eof))
 }
 
+func (p *parser) isAfterNewline(tokType tokenType) bool {
+	return p.curTokenIs(newline) && p.peekTokenIs(tokType)
+}
+
+func (p *parser) isNextLineElement() bool {
+	return p.curTokenIs(newline) && p.peekToken().IsElementToken()
+}
+
 func (p *parser) parse(delim tokenType) ([]component, error) {
 	elements := make([]component, 0)
 	var properties []property
@@ -57,7 +67,7 @@ func (p *parser) parse(delim tokenType) ([]component, error) {
 	for p.currentTok.Type != delim && p.currentTok.Type != eof {
 		if p.currentTok.Type == lsquirly {
 			var err error
-			properties, err = p.parseProperties()
+			properties, err, _ = p.parseProperties()
 			if err != nil {
 				return nil, err
 			}
@@ -184,33 +194,38 @@ func isBlockElement(comp component) bool {
 	return false
 }
 
-func (p *parser) parseProperties() ([]property, error) {
+func (p *parser) parseProperties() ([]property, error, string) {
 	props := make([]property, 0)
+	propsString := "{"
 	for !p.curTokenIs(rsquirly) {
 		if p.curTokenIs(dot) {
 			if !p.peekTokenIs(word) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. DOT must be followed by a WORD"}
+				return nil, &parseError{errorReason: "Property formatted incorrectly. DOT must be followed by a WORD"}, propsString
 			}
 
 			p.nextToken()
+			propsString += p.currentTok.Literal
 			key := p.currentTok.Literal
 
 			if !p.peekTokenIs(equals) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. KEY must be follwed by EQUALS"}
+				return nil, &parseError{errorReason: "Property formatted incorrectly. KEY must be follwed by EQUALS"}, propsString
 			}
 
 			p.nextToken()
+			propsString += p.currentTok.Literal
 			if !p.peekTokenIs(word) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. EQUALS must be followed by VALUE"}
+				return nil, &parseError{errorReason: "Property formatted incorrectly. EQUALS must be followed by VALUE"}, propsString
 			}
 
 			p.nextToken()
+			// propsString += p.currentTok.Literal
 			value := p.currentTok.Literal
 
 			props = append(props, property{Name: key, Value: value})
 		}
 
 		p.nextToken()
+		propsString += p.currentTok.Literal
 	}
 
 	p.nextToken()
@@ -218,7 +233,7 @@ func (p *parser) parseProperties() ([]property, error) {
 		p.nextToken()
 	}
 
-	return props, nil
+	return props, nil, ""
 }
 
 func (p *parser) parseFragment(properties []property, closing tokenType) *fragment {
@@ -235,14 +250,88 @@ func (p *parser) parseTextLine(closing tokenType) string {
 	return lineString
 }
 
+func (p *parser) parseLine(closing tokenType) []component {
+	lineElements := make([]component, 0)
+	var lineString string
+
+	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
+		if p.currentTok.IsElementToken() {
+			if len(lineString) > 0 {
+				lineElements = append(lineElements, &fragment{String: lineString})
+				lineString = ""
+			}
+
+			lineElements = append(lineElements, p.parseComponent(nil, closing))
+		} else if p.curTokenIs(lsquirly) {
+			properties, parseErr, propsText := p.parseProperties()
+			if parseErr != nil {
+				lineString += propsText
+				p.nextToken()
+			} else {
+				if len(lineString) > 0 {
+					lineElements = append(lineElements, &fragment{String: lineString})
+					lineString = ""
+				}
+				lineElements = append(lineElements, p.parseComponent(properties, closing))
+			}
+		} else {
+			lineString += p.currentTok.Literal
+			p.nextToken()
+		}
+	}
+
+	if len(lineString) > 0 {
+		lineElements = append(lineElements, &fragment{String: lineString})
+	}
+
+	return lineElements
+}
+
 func (p *parser) parseTextBlock(closing tokenType) string {
 	var blockString string
-	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.peekTokenIs(closing) || p.isDoubleBreak()) {
+	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
 		blockString += p.currentTok.Literal
 		p.nextToken()
 	}
 
 	return blockString
+}
+
+func (p *parser) parseBlock(closing tokenType) []component {
+	blockElements := make([]component, 0)
+	var blockString string
+
+	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
+		if p.currentTok.IsElementToken() {
+			if len(blockString) > 0 {
+				blockElements = append(blockElements, &fragment{String: blockString})
+				blockString = ""
+			}
+
+			blockElements = append(blockElements, p.parseComponent(nil, closing))
+		} else if p.curTokenIs(lsquirly) {
+			properties, parseErr, propsText := p.parseProperties()
+			if parseErr != nil {
+				blockString += propsText
+				p.nextToken()
+			} else {
+				if len(blockString) > 0 {
+					blockElements = append(blockElements, &fragment{String: blockString})
+					blockString = ""
+				}
+				blockElements = append(blockElements, p.parseComponent(properties, closing))
+			}
+		} else {
+			blockString += p.currentTok.Literal
+			p.nextToken()
+		}
+	}
+
+	if len(blockString) > 0 {
+		blockElements = append(blockElements, &fragment{String: blockString})
+	}
+
+	return blockElements
 }
 
 func (p *parser) parseHeader(props []property, closing tokenType) component {
@@ -258,17 +347,18 @@ func (p *parser) parseHeader(props []property, closing tokenType) component {
 	}
 
 	p.nextToken()
-	content := p.parseTextLine(closing)
-	return &header{Level: level, Text: content, Properties: props}
+	contentElements := p.parseLine(closing)
+	return &header{Level: level, Content: contentElements, Properties: props}
 }
 
 func (p *parser) parseParagraph(props []property, closing tokenType) component {
-	content := strings.ReplaceAll(p.parseTextBlock(closing), "\\n", " ")
-	if len(content) == 0 {
+	// content := strings.ReplaceAll(p.parseTextBlock(closing), "\\n", " ")
+	contentElements := p.parseBlock(closing)
+	if len(contentElements) == 0 {
 		return nil
 	}
 
-	return &paragraph{Text: content, Properties: props}
+	return &paragraph{Content: contentElements, Properties: props}
 }
 
 func prefixFragment(comp component, prefix string, closing tokenType) {
@@ -315,6 +405,7 @@ func (p *parser) parseStrong(properties []property, closing tokenType) component
 	}
 
 	p.nextToken()
+	p.nextToken()
 	return &bold{Properties: properties, Text: strongString}
 }
 
@@ -338,6 +429,7 @@ func (p *parser) parseEm(properties []property, closing tokenType) component {
 		}
 	}
 
+	p.nextToken()
 	return &italic{Properties: properties, Text: emString}
 }
 
@@ -365,7 +457,7 @@ func (p *parser) parseOrderedListElement(properties []property, closing tokenTyp
 			p.nextToken()
 		}
 		elementContent := strings.TrimSpace(p.parseTextLine(closing))
-		element := listItem{Component: &paragraph{Text: elementContent}}
+		element := listItem{Component: &paragraph{Content: []component{&fragment{String: elementContent}}}}
 		listElements = append(listElements, element)
 	}
 
@@ -385,7 +477,7 @@ func (p *parser) parseUnorderedList(properties []property, closing tokenType) co
 		}
 
 		elementContent := strings.TrimSpace(p.parseTextLine(closing))
-		element := listItem{Component: &paragraph{Text: elementContent}}
+		element := listItem{Component: &paragraph{Content: []component{&fragment{String: elementContent}}}}
 		listElements = append(listElements, element)
 	}
 
@@ -574,6 +666,7 @@ func (p *parser) parseSpan(properties []property, closing tokenType) component {
 
 	children := []component{&fragment{String: strings.TrimSpace(spanString)}}
 
+	p.nextToken()
 	return &span{Properties: properties, Children: children}
 }
 

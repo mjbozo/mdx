@@ -3,14 +3,6 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<meta name="description" content="" />
-		<title>MDX Sample</title>
-		<link rel="stylesheet" type="text/css" href="sample.css">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow">
-        <script>
-            const handleClick = () => {
-                console.log("Hello!");
-            }
-        </script>
     </head>
 <body>
     <nav>
@@ -25,14 +17,20 @@
     <p>Actions</p>
 </div>
 </nav>
-    <br/>
     <div class="content">
-    <h1>Hello I'm a Heading <p>with a p tag inside?!</p></h1>
+    <h1>Hello I'm a Heading with a <em class="test">slinky</em> tag inside?!</h1>
     <p>This is a paragraph!</p>
     <br/>
-    <p class="test">This is also a paragraph! :O # Followed by a h1</p>
+    <em>inline elements</em>
+    <p>followed by text on same line gets separated :(</p>
     <br/>
-    <p>This is a new paragraph which should not have class of test. But is made up of multiple lines</p>
+    <br/>
+    <p>Okay now I'm a <strong>paragraph</strong> with <span class="rainbow">goodies</span> <em>inside</em> me :O</p>
+    <br/>
+    <p class="test">This is also a paragraph! :O</p>
+    <h1>Followed by a h1</h1>
+    <br/>
+    <p>This is a new paragraph which should not have class of test.\nBut is made up of multiple lines</p>
     <br/>
     <code>code me</code>
     <br/>
@@ -44,7 +42,7 @@
     **hello*
     <br/>
     <em>bye</em>
-    <strong>bye</strong>
+    <em>bye</em>
     <br/>
     <br/>
     <blockquote>Quote me</blockquote>
@@ -66,8 +64,6 @@
 </ul>
     <br/>
     <hr/>
-    <br/>
-    <br/>
     <div class="code-block">
     <pre>package main</pre>
     <pre>import "fmt"</pre>
@@ -75,36 +71,25 @@
     <pre>    fmt.Printf("Hello, world")</pre>
     <pre>}</pre>
 </div>
-    <br/>
-    <br/>
     <button class="primary-btn" onclick="handleClick()">
     Click Me
 </button>
-    <br/>
-    <br/>
     <img src="https://img.pokemondb.net/artwork/avif/regirock.avif" alt="Reginald"/>
-    <br/>
-    <br/>
     <div>
     <p>What about now</p>
     <br/>
     <h1>Header me</h1>
 </div>
-    <br/>
-    <br/>
     <a href="https://www.google.com">Google</a>
     <br/>
     <br/>
     <a href="https://github.com">https://github.com</a>
     <br/>
     <br/>
-    <span class="inside">
-    ya mum
-</span>
+    <span class="inside">ya mum</span>
     <br/>
 </div>
-    <br/>
-    <br/>
     <p>bepis</p>
+    <br/>
 </body>
 </html>
