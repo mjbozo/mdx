@@ -35,16 +35,12 @@ type header struct {
 	Content    []component
 }
 
-func (h *header) Text() string {
-	if len(h.Content) != 1 {
-		return ""
+func (h *header) InnerHtml() string {
+	var contentString string
+	for _, child := range h.Content {
+		contentString += child.Html()
 	}
-
-	if frag, ok := h.Content[0].(*fragment); ok {
-		return frag.String
-	} else {
-		return ""
-	}
+	return contentString
 }
 
 func (h *header) Html() string {
@@ -57,11 +53,7 @@ func (h *header) Html() string {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
 
-	var contentString string
-	for _, child := range h.Content {
-		contentString += child.Html()
-	}
-	return fmt.Sprintf("<h%d%s>%s</h%d>", h.Level, propertyString, contentString, h.Level)
+	return fmt.Sprintf("<h%d%s>%s</h%d>", h.Level, propertyString, h.InnerHtml(), h.Level)
 }
 
 type paragraph struct {
@@ -69,16 +61,12 @@ type paragraph struct {
 	Content    []component
 }
 
-func (p *paragraph) Text() string {
-	if len(p.Content) != 1 {
-		return ""
+func (p *paragraph) InnerHtml() string {
+	var contentString string
+	for _, child := range p.Content {
+		contentString += child.Html()
 	}
-
-	if frag, ok := p.Content[0].(*fragment); ok {
-		return frag.String
-	} else {
-		return ""
-	}
+	return contentString
 }
 
 func (p *paragraph) Html() string {
@@ -87,11 +75,7 @@ func (p *paragraph) Html() string {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
 
-	var contentString string
-	for _, child := range p.Content {
-		contentString += child.Html()
-	}
-	return fmt.Sprintf("<p%s>%s</p>", propertyString, contentString)
+	return fmt.Sprintf("<p%s>%s</p>", propertyString, p.InnerHtml())
 }
 
 type code struct {
