@@ -57,6 +57,7 @@ func (t *token) IsElementToken() bool {
 	switch t.Type {
 	case hash,
 		asterisk,
+		backtick,
 		bang,
 		gt,
 		dash,

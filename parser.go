@@ -380,6 +380,7 @@ func (p *parser) parseCode(properties []property, closing tokenType) component {
 		p.nextToken()
 	}
 
+	p.nextToken()
 	return &code{Properties: properties, Text: codeString}
 }
 

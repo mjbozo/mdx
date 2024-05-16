@@ -14,18 +14,16 @@ func (e *invalidFileError) Error() string {
 }
 
 // TODO: HTML Formatting
+// TODO: Format HTML correctly when generating file
 // TODO: Code block formatting
 // TODO: Consolidation / cleanup step after AST first built
 // TODO: Ordered list only parses when list starts with single digit number
-// TODO: Format HTML correctly when generating file
 // TODO: Blockquote are not able to be nested at the moment
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
+// TODO: Unordered lists should ignore all whitespace between list components
 // TODO: Unordered list can't be immediately followed by horizontal rule
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
-// TODO: Need a way to put data in <head> section. UPDATE: Maybe not
 // TODO: Div doesn't return fragment when no closing bracket exists
-// TODO: Should be able to have <code> blocks inside <p> tags
-// TODO: Unordered lists should ignore all whitespace between list components
 
 // Transform .mdx or .md file into HTML string.
 // On successful transformation, returns string representing HTML and nil error.
