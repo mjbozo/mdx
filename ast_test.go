@@ -80,7 +80,7 @@ func TestCode(t *testing.T) {
 }
 
 func TestBold(t *testing.T) {
-	bold := bold{Text: "stronk"}
+	bold := bold{Content: []component{&fragment{String: "stronk"}}}
 	boldHtml := bold.Html()
 	expected := "<strong>stronk</strong>"
 	if boldHtml != expected {
@@ -96,7 +96,7 @@ func TestBold(t *testing.T) {
 }
 
 func TestItalic(t *testing.T) {
-	italic := italic{Text: "italian"}
+	italic := italic{Content: []component{&fragment{String: "italian"}}}
 	italicHtml := italic.Html()
 	expected := "<em>italian</em>"
 	if italicHtml != expected {

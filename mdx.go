@@ -17,6 +17,7 @@ func (e *invalidFileError) Error() string {
 // TODO: Format HTML correctly when generating file
 // TODO: Code block formatting
 // TODO: Consolidation / cleanup step after AST first built
+// TODO: Parsing backslash
 // TODO: Ordered list only parses when list starts with single digit number
 // TODO: Blockquote are not able to be nested at the moment
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
@@ -24,6 +25,7 @@ func (e *invalidFileError) Error() string {
 // TODO: Unordered list can't be immediately followed by horizontal rule
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Div doesn't return fragment when no closing bracket exists
+// TODO: Bold breaks if not closed properly: double closing token not supported
 
 // Transform .mdx or .md file into HTML string.
 // On successful transformation, returns string representing HTML and nil error.

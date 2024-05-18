@@ -93,7 +93,15 @@ func (c *code) Html() string {
 
 type bold struct {
 	Properties []property
-	Text       string
+	Content    []component
+}
+
+func (b *bold) InnerHtml() string {
+	var contentString string
+	for _, child := range b.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (b *bold) Html() string {
@@ -101,12 +109,20 @@ func (b *bold) Html() string {
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<strong%s>%s</strong>", propertyString, b.Text)
+	return fmt.Sprintf("<strong%s>%s</strong>", propertyString, b.InnerHtml())
 }
 
 type italic struct {
 	Properties []property
-	Text       string
+	Content    []component
+}
+
+func (i *italic) InnerHtml() string {
+	var contentString string
+	for _, child := range i.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (i *italic) Html() string {
@@ -114,7 +130,7 @@ func (i *italic) Html() string {
 	for _, property := range i.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<em%s>%s</em>", propertyString, i.Text)
+	return fmt.Sprintf("<em%s>%s</em>", propertyString, i.InnerHtml())
 }
 
 type blockQuote struct {

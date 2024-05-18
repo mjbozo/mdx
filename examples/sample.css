@@ -57,6 +57,12 @@ li {
   padding: 4px;
 }
 
+blockquote {
+  border-left: 3px solid #aaa;
+  padding-left: 6px;
+  margin: 4px;
+}
+
 .code-container {
   position: relative;
 }

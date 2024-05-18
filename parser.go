@@ -287,6 +287,43 @@ func (p *parser) parseLine(closing tokenType) []component {
 	return lineElements
 }
 
+func (p *parser) parseLineDoubleClose(closing tokenType) []component {
+	lineElements := make([]component, 0)
+	var lineString string
+
+	for !(p.curTokenIs(newline) || (p.curTokenIs(closing) && p.peekTokenIs(closing))) {
+		if p.currentTok.IsElementToken() {
+			if len(lineString) > 0 {
+				lineElements = append(lineElements, &fragment{String: lineString})
+				lineString = ""
+			}
+
+			lineElements = append(lineElements, p.parseComponent(nil, closing))
+		} else if p.curTokenIs(lsquirly) {
+			properties, parseErr, propsText := p.parseProperties()
+			if parseErr != nil {
+				lineString += propsText
+				p.nextToken()
+			} else {
+				if len(lineString) > 0 {
+					lineElements = append(lineElements, &fragment{String: lineString})
+					lineString = ""
+				}
+				lineElements = append(lineElements, p.parseComponent(properties, closing))
+			}
+		} else {
+			lineString += p.currentTok.Literal
+			p.nextToken()
+		}
+	}
+
+	if len(lineString) > 0 {
+		lineElements = append(lineElements, &fragment{String: lineString})
+	}
+
+	return lineElements
+}
+
 func (p *parser) parseTextBlock(closing tokenType) string {
 	var blockString string
 	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
@@ -392,46 +429,27 @@ func (p *parser) parseStrong(properties []property, closing tokenType) component
 	}
 
 	p.nextToken()
-	var strongString string
 
-	for !(p.curTokenIs(asterisk) && p.peekTokenIs(asterisk)) {
-		strongString += p.currentTok.Literal
-		p.nextToken()
-
-		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			fragment := &fragment{String: strongString}
-			prefixFragment(fragment, "**", closing)
-			return fragment
-		}
-	}
+	content := p.parseLineDoubleClose(asterisk)
 
 	p.nextToken()
 	p.nextToken()
-	return &bold{Properties: properties, Text: strongString}
+
+	return &bold{Properties: properties, Content: content}
 }
 
 func (p *parser) parseEm(properties []property, closing tokenType) component {
 	if p.peekTokenIs(space) || p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
+		p.nextToken()
 		return &fragment{String: content}
 	}
 
 	p.nextToken()
-	var emString string
-
-	for !p.curTokenIs(asterisk) {
-		emString += p.currentTok.Literal
-		p.nextToken()
-
-		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			fragment := &fragment{String: emString}
-			prefixFragment(fragment, "*", closing)
-			return fragment
-		}
-	}
+	content := p.parseLine(asterisk)
 
 	p.nextToken()
-	return &italic{Properties: properties, Text: emString}
+	return &italic{Properties: properties, Content: content}
 }
 
 func (p *parser) parseBlockQuote(properties []property, closing tokenType) component {
