@@ -454,7 +454,7 @@ func (p *parser) parseBlockQuote(properties []property, closing tokenType, initi
 
 	content := make([]component, 0)
 
-	for !p.curTokenIs(newline) {
+	for !(p.curTokenIs(newline) || p.curTokenIs(eof)) {
 		lineContent := p.parseLine(closing)
 		content = append(content, lineContent...)
 		p.nextToken()
