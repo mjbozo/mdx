@@ -135,7 +135,15 @@ func (i *italic) Html() string {
 
 type blockQuote struct {
 	Properties []property
-	Text       string
+	Content    []component
+}
+
+func (bq *blockQuote) InnerHtml() string {
+	var contentString string
+	for _, child := range bq.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (bq *blockQuote) Html() string {
@@ -143,7 +151,7 @@ func (bq *blockQuote) Html() string {
 	for _, property := range bq.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<blockquote%s>%s</blockquote>", propertyString, bq.Text)
+	return fmt.Sprintf("<blockquote%s>%s</blockquote>", propertyString, bq.InnerHtml())
 }
 
 type listItem struct {

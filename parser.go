@@ -104,7 +104,7 @@ func (p *parser) parseComponent(properties []property, closing tokenType) compon
 			component = p.parseEm(properties, closing)
 		}
 	case gt:
-		component = p.parseBlockQuote(properties, closing)
+		component = p.parseBlockQuote(properties, closing, 0)
 	case listelement:
 		component = p.parseOrderedListElement(properties, closing)
 	case dash:
@@ -324,16 +324,6 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 	return lineElements
 }
 
-func (p *parser) parseTextBlock(closing tokenType) string {
-	var blockString string
-	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
-		blockString += p.currentTok.Literal
-		p.nextToken()
-	}
-
-	return blockString
-}
-
 func (p *parser) parseBlock(closing tokenType) []component {
 	blockElements := make([]component, 0)
 	var blockString string
@@ -341,7 +331,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
 		if p.currentTok.IsElementToken() {
 			if len(blockString) > 0 {
-				blockElements = append(blockElements, &fragment{String: blockString})
+				blockElements = append(blockElements, &fragment{String: strings.ReplaceAll(blockString, "\\n", " ")})
 				blockString = ""
 			}
 
@@ -353,7 +343,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 				p.nextToken()
 			} else {
 				if len(blockString) > 0 {
-					blockElements = append(blockElements, &fragment{String: blockString})
+					blockElements = append(blockElements, &fragment{String: strings.ReplaceAll(blockString, "\\n", " ")})
 					blockString = ""
 				}
 				blockElements = append(blockElements, p.parseComponent(properties, closing))
@@ -365,7 +355,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 	}
 
 	if len(blockString) > 0 {
-		blockElements = append(blockElements, &fragment{String: blockString})
+		blockElements = append(blockElements, &fragment{String: strings.ReplaceAll(blockString, "\\n", " ")})
 	}
 
 	return blockElements
@@ -452,15 +442,64 @@ func (p *parser) parseEm(properties []property, closing tokenType) component {
 	return &italic{Properties: properties, Content: content}
 }
 
-func (p *parser) parseBlockQuote(properties []property, closing tokenType) component {
-	p.nextToken()
-	content := strings.ReplaceAll(p.parseTextBlock(closing), "\\n", "<br/>")
-	content = strings.TrimSpace(content)
-	if len(content) == 0 {
-		return nil
+func (p *parser) parseBlockQuote(properties []property, closing tokenType, initialDepth int) component {
+	depth := initialDepth
+	for p.curTokenIs(gt) {
+		depth += 1
+		p.nextToken()
+		for p.curTokenIs(space) {
+			p.nextToken()
+		}
 	}
 
-	return &blockQuote{Properties: properties, Text: content}
+	content := make([]component, 0)
+
+	for !p.curTokenIs(newline) {
+		lineContent := p.parseLine(closing)
+		content = append(content, lineContent...)
+		p.nextToken()
+
+		if p.curTokenIs(newline) {
+			// double newline
+			break
+		}
+
+		nextDepth := 0
+		for p.curTokenIs(gt) {
+			nextDepth += 1
+			p.nextToken()
+			for p.curTokenIs(space) {
+				p.nextToken()
+			}
+		}
+
+		if nextDepth < depth && p.curTokenIs(newline) {
+			p.nextToken()
+			return &blockQuote{Properties: properties, Content: content}
+		}
+
+		if nextDepth > depth {
+			content = append(content, p.parseBlockQuote(properties, closing, nextDepth))
+			nextDepth = 0
+			for p.curTokenIs(gt) {
+				nextDepth += 1
+				p.nextToken()
+				for p.curTokenIs(space) {
+					p.nextToken()
+				}
+			}
+			if nextDepth < depth {
+				if nextDepth != 0 && p.curTokenIs(newline) {
+					p.nextToken()
+				}
+				return &blockQuote{Properties: properties, Content: content}
+			}
+		} else {
+			content = append(content, &fragment{String: " "})
+		}
+	}
+
+	return &blockQuote{Properties: properties, Content: content}
 }
 
 func (p *parser) parseOrderedListElement(properties []property, closing tokenType) component {

@@ -112,7 +112,7 @@ func TestItalic(t *testing.T) {
 }
 
 func TestBlockQuote(t *testing.T) {
-	blockquote := blockQuote{Text: "quote"}
+	blockquote := blockQuote{Content: []component{&fragment{String: "quote"}}}
 	blockquoteHtml := blockquote.Html()
 	expected := "<blockquote>quote</blockquote>"
 	if blockquoteHtml != expected {

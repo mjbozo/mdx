@@ -626,8 +626,8 @@ func TestParseBlockQuote(t *testing.T) {
 	element := elements[0]
 
 	if quote, ok := element.(*blockQuote); ok {
-		if quote.Text != "Quote me" {
-			fail(t, fmt.Sprintf("Expected blockQuote text='Quote me', got=%s", quote.Text))
+		if quote.InnerHtml() != "Quote me" {
+			fail(t, fmt.Sprintf("Expected blockQuote text='Quote me', got=%s", quote.InnerHtml()))
 		}
 	} else {
 		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
@@ -649,12 +649,23 @@ MDX`
 	element := elements[1]
 
 	if quote, ok := element.(*blockQuote); ok {
-		if quote.Text != "Quote" {
-			fail(t, fmt.Sprintf("Expected blockQuote text='Quote', got=%s", quote.Text))
+		if quote.InnerHtml() != "Quote" {
+			fail(t, fmt.Sprintf("Expected blockQuote text='Quote', got=%s", quote.InnerHtml()))
 		}
 	} else {
 		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
 	}
+}
+
+func TestParseMultiLayerBlockQuote(t *testing.T) {
+	input := "> > Quote"
+	elements := execute(t, input)
+
+	if len(elements) != 1 {
+		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
+		t.FailNow()
+	}
+
 }
 
 func TestParseBlockQuoteWithNestedElements(t *testing.T) {

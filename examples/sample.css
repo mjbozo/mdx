@@ -58,9 +58,9 @@ li {
 }
 
 blockquote {
-  border-left: 3px solid #aaa;
-  padding-left: 6px;
-  margin: 4px;
+  border-left: 0.25em solid #d0d7da;
+  padding: 0.25em 1em;
+  margin: 12px 0 12px;
 }
 
 .code-container {
