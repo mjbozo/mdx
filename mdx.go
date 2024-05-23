@@ -13,19 +13,19 @@ func (e *invalidFileError) Error() string {
 	return "Invalid file type. File must have .md or .mdx extension"
 }
 
-// TODO: HTML Formatting
 // TODO: Format HTML correctly when generating file
 // TODO: Code block formatting
 // TODO: Consolidation / cleanup step after AST first built
 // TODO: Parsing backslash
 // TODO: Ordered list only parses when list starts with single digit number
-// TODO: Blockquote are not able to be nested at the moment
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
 // TODO: Unordered lists should ignore all whitespace between list components
 // TODO: Unordered list can't be immediately followed by horizontal rule
 // TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Div doesn't return fragment when no closing bracket exists
 // TODO: Bold breaks if not closed properly: double closing token not supported
+// TODO: Review where fragment can be replaced with paragraph => more friendly for styling
+// TODO: Blockquote still a bit fuckywucky when switching back and forth between depths
 
 // Transform .mdx or .md file into HTML string.
 // On successful transformation, returns string representing HTML and nil error.

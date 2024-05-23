@@ -104,7 +104,7 @@ func (p *parser) parseComponent(properties []property, closing tokenType) compon
 			component = p.parseEm(properties, closing)
 		}
 	case gt:
-		component = p.parseBlockQuote(properties, closing, 0)
+		component, _ = p.parseBlockQuote(properties, closing, 0)
 	case listelement:
 		component = p.parseOrderedListElement(properties, closing)
 	case dash:
@@ -442,25 +442,32 @@ func (p *parser) parseEm(properties []property, closing tokenType) component {
 	return &italic{Properties: properties, Content: content}
 }
 
-func (p *parser) parseBlockQuote(properties []property, closing tokenType, initialDepth int) component {
+func (p *parser) parseBlockQuote(properties []property, closing tokenType, initialDepth int) (component, int) {
+	content := make([]component, 0)
 	depth := initialDepth
+
 	for p.curTokenIs(gt) {
 		depth += 1
-		p.nextToken()
+		if depth > initialDepth+1 {
+			nested, _ := p.parseBlockQuote(properties, closing, depth-1)
+			content = append(content, nested)
+			depth = initialDepth
+		} else {
+			p.nextToken()
+		}
+
 		for p.curTokenIs(space) {
 			p.nextToken()
 		}
 	}
-
-	content := make([]component, 0)
 
 	for !(p.curTokenIs(newline) || p.curTokenIs(eof)) {
 		lineContent := p.parseLine(closing)
 		content = append(content, lineContent...)
 		p.nextToken()
 
-		if p.curTokenIs(newline) {
-			// double newline
+		if p.curTokenIs(newline) || p.curTokenIs(eof) {
+			// double newline or eof
 			break
 		}
 
@@ -475,11 +482,28 @@ func (p *parser) parseBlockQuote(properties []property, closing tokenType, initi
 
 		if nextDepth < depth && p.curTokenIs(newline) {
 			p.nextToken()
-			return &blockQuote{Properties: properties, Content: content}
+			return &blockQuote{Properties: properties, Content: content}, nextDepth
+		}
+
+		if nextDepth == depth && p.curTokenIs(newline) {
+			content = append(content, &lineBreak{})
+			p.nextToken()
+			for p.curTokenIs(gt) {
+				p.nextToken()
+				for p.curTokenIs(space) {
+					p.nextToken()
+				}
+			}
+			continue
 		}
 
 		if nextDepth > depth {
-			content = append(content, p.parseBlockQuote(properties, closing, nextDepth))
+			nested, d := p.parseBlockQuote(properties, closing, nextDepth)
+			content = append(content, nested)
+			if d < depth {
+				return &blockQuote{Properties: properties, Content: content}, d
+			}
+
 			nextDepth = 0
 			for p.curTokenIs(gt) {
 				nextDepth += 1
@@ -492,14 +516,14 @@ func (p *parser) parseBlockQuote(properties []property, closing tokenType, initi
 				if nextDepth != 0 && p.curTokenIs(newline) {
 					p.nextToken()
 				}
-				return &blockQuote{Properties: properties, Content: content}
+				return &blockQuote{Properties: properties, Content: content}, nextDepth
 			}
 		} else {
 			content = append(content, &fragment{String: " "})
 		}
 	}
 
-	return &blockQuote{Properties: properties, Content: content}
+	return &blockQuote{Properties: properties, Content: content}, 0
 }
 
 func (p *parser) parseOrderedListElement(properties []property, closing tokenType) component {

@@ -19,25 +19,24 @@ func fail(t *testing.T, message string) {
 	t.Errorf("%s failed: %s", t.Name(), message)
 }
 
+func validateLength(t *testing.T, actual, expected int) {
+	t.Helper()
+	if actual != expected {
+		fail(t, fmt.Sprintf("Expected 1 element, got=%d", actual))
+		t.FailNow()
+	}
+}
+
 func TestParseProperties(t *testing.T) {
 	input := "{ .class=test } Hello, world"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if p, ok := element.(*paragraph); ok {
 		properties := p.Properties
 
-		if len(properties) != 1 {
-			fail(t, fmt.Sprintf("Expected 1 property, got=%d", len(properties)))
-			t.FailNow()
-		}
-
+		validateLength(t, len(properties), 1)
 		property := properties[0]
 
 		if property.Name != "class" {
@@ -55,18 +54,11 @@ func TestParseProperties(t *testing.T) {
 func TestParsePropertiesInline(t *testing.T) {
 	input := "Hello, { .class=groovy } $ world $"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
+
 	if p, ok := element.(*paragraph); ok {
-		if len(p.Content) != 2 {
-			fail(t, fmt.Sprintf("Expected 2 child elements, got=%d", len(p.Content)))
-			t.FailNow()
-		}
+		validateLength(t, len(p.Content), 2)
 
 		if frag, ok := p.Content[0].(*fragment); ok {
 			if frag.String != "Hello, " {
@@ -77,13 +69,8 @@ func TestParsePropertiesInline(t *testing.T) {
 		}
 
 		if s, ok := p.Content[1].(*span); ok {
-			if len(s.Children) != 1 {
-				fail(t, fmt.Sprintf("Expected 1 child, got=%d", len(s.Children)))
-			}
-
-			if len(s.Properties) != 1 {
-				fail(t, fmt.Sprintf("Expected 1 property, got=%d", len(s.Properties)))
-			}
+			validateLength(t, len(s.Children), 1)
+			validateLength(t, len(s.Properties), 1)
 
 			properties := s.Properties[0]
 
@@ -112,18 +99,11 @@ func TestParseNestedProperties(t *testing.T) {
 	Zuzzy
 ]`
 	elements := execute(t, input)
-
-	if len(elements) != 2 {
-		fail(t, fmt.Sprintf("Expected 2 elements, got=%d", len(elements)))
-	}
-
+	validateLength(t, len(elements), 2)
 	element := elements[1]
 
 	if div, ok := element.(*div); ok {
-		if len(div.Properties) != 1 {
-			fail(t, fmt.Sprintf("Expected 1 Div property,, got=%d", len(div.Properties)))
-			t.FailNow()
-		}
+		validateLength(t, len(div.Properties), 1)
 
 		divProperty := div.Properties[0]
 		if divProperty.Name != "class" {
@@ -134,19 +114,14 @@ func TestParseNestedProperties(t *testing.T) {
 			fail(t, fmt.Sprintf("Expected Div property Value=container, got=%s", divProperty.Value))
 		}
 
-		if len(div.Children) != 2 {
-			fail(t, fmt.Sprintf("Expected 2 Div children, got=%d", len(div.Children)))
-		}
+		validateLength(t, len(div.Children), 2)
 
 		child := div.Children[1]
 		if p, ok := child.(*paragraph); ok {
-			if len(p.Properties) != 2 {
-				fail(t, fmt.Sprintf("Expected 2 Paragraph properties, got=%d", len(p.Properties)))
-			}
+			validateLength(t, len(p.Properties), 2)
 
 			if p.Properties[0].Name != "class" {
 				fail(t, fmt.Sprintf("Expected Paragraph property Name=class, got=%s", p.Properties[0].Name))
-
 			}
 
 			if p.Properties[0].Value != "content" {
@@ -155,7 +130,6 @@ func TestParseNestedProperties(t *testing.T) {
 
 			if p.Properties[1].Name != "data-parent" {
 				fail(t, fmt.Sprintf("Expected Paragraph property Name=data-parent, got=%s", p.Properties[1].Name))
-
 			}
 
 			if p.Properties[1].Value != "container" {
@@ -177,12 +151,9 @@ func TestParseFragment(t *testing.T) {
 func TestParseHeader1(t *testing.T) {
 	input := "# Heading"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 elements, got=%d", len(elements)))
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
+
 	if head, ok := element.(*header); ok {
 		if head.Level != 1 {
 			fail(t, fmt.Sprintf("Expected Header level 1, got=%d", head.Level))
@@ -199,12 +170,9 @@ func TestParseHeader1(t *testing.T) {
 func TestParseHeader2(t *testing.T) {
 	input := "## Heading Too"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
+
 	if head, ok := element.(*header); ok {
 		if head.Level != 2 {
 			fail(t, fmt.Sprintf("Expected Header level 1, got=%d", head.Level))
@@ -223,12 +191,7 @@ func TestParseHeaderBetweenElements(t *testing.T) {
 # World
 MDX`
 	elements := execute(t, input)
-
-	if len(elements) != 3 {
-		fail(t, fmt.Sprintf("Expected 3 elements, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 3)
 	element := elements[1]
 
 	if head, ok := element.(*header); ok {
@@ -247,12 +210,7 @@ MDX`
 func TestParseHeaderWithNestedElements(t *testing.T) {
 	input := `# Hello **world**`
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Epected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if head, ok := element.(*header); ok {
@@ -260,10 +218,7 @@ func TestParseHeaderWithNestedElements(t *testing.T) {
 			fail(t, fmt.Sprintf("Expected Header level 1, got=%d", head.Level))
 		}
 
-		if len(head.Content) != 2 {
-			fail(t, fmt.Sprintf("Expected 2 children, got=%d", len(head.Content)))
-			t.FailNow()
-		}
+		validateLength(t, len(head.Content), 2)
 
 		if frag, ok := head.Content[0].(*fragment); ok {
 			if frag.String != "Hello " {
@@ -288,11 +243,7 @@ func TestParseHeaderWithNestedElements(t *testing.T) {
 func TestParseParagraph(t *testing.T) {
 	input := "Hello, world"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 elements, got=%d", len(elements)))
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if p, ok := element.(*paragraph); ok {
@@ -309,11 +260,7 @@ func TestParseParagraphBetweenElements(t *testing.T) {
 Paragraph test
 # Header Too`
 	elements := execute(t, input)
-
-	if len(elements) != 3 {
-		fail(t, fmt.Sprintf("Expected 3 elements, got=%d", len(elements)))
-		t.FailNow()
-	}
+	validateLength(t, len(elements), 3)
 
 	element := elements[1]
 
@@ -329,18 +276,11 @@ Paragraph test
 func TestParseParagraphWithNestedElements(t *testing.T) {
 	input := "Hello, **world**"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 elements, got=%d", len(elements)))
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if p, ok := element.(*paragraph); ok {
-		if len(p.Content) != 2 {
-			fail(t, fmt.Sprintf("Expected 2 children, got=%d", len(p.Content)))
-			t.FailNow()
-		}
+		validateLength(t, len(p.Content), 2)
 
 		if frag, ok := p.Content[0].(*fragment); ok {
 			if frag.String != "Hello, " {
@@ -366,9 +306,7 @@ func TestParseCode(t *testing.T) {
 	input := "`print('Hello, world!')`"
 	elements := execute(t, input)
 
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	}
+	validateLength(t, len(elements), 1)
 
 	element := elements[0]
 	if code, ok := element.(*code); ok {
@@ -382,9 +320,7 @@ func TestParseCode(t *testing.T) {
 	input = "`print('Hello, world!')"
 	elements = execute(t, input)
 
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	}
+	validateLength(t, len(elements), 1)
 
 	element = elements[0]
 	if frag, ok := element.(*fragment); ok {
@@ -401,12 +337,7 @@ func TestParseCodeBetweenElements(t *testing.T) {
 	input += "`hello, world` "
 	input += "goodbye, code"
 	elements := execute(t, input)
-
-	if len(elements) != 3 {
-		fail(t, fmt.Sprintf("Expected 3 elements, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 3)
 	element := elements[1]
 
 	if code, ok := element.(*code); ok {
@@ -421,11 +352,7 @@ func TestParseCodeBetweenElements(t *testing.T) {
 func TestParseCodeWithinElement(t *testing.T) {
 	input := "Code: `hello, world` goodbye, code"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
+	validateLength(t, len(elements), 1)
 
 	if p, ok := elements[0].(*paragraph); ok {
 		if len(p.Content) != 3 {
@@ -446,13 +373,9 @@ func TestParseCodeWithinElement(t *testing.T) {
 func TestParseStrong(t *testing.T) {
 	input := "**stronk**"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
+
 	if strong, ok := element.(*bold); ok {
 		if strong.InnerHtml() != "stronk" {
 			fail(t, fmt.Sprintf("Expected text 'stronk', got=%s", strong.InnerHtml()))
@@ -467,12 +390,7 @@ func TestParseStrongBetweenElements(t *testing.T) {
 **stronk**
 MDX`
 	elements := execute(t, input)
-
-	if len(elements) != 3 {
-		fail(t, fmt.Sprintf("Expected 3 elements, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 3)
 	element := elements[1]
 
 	if strong, ok := element.(*bold); ok {
@@ -487,17 +405,10 @@ MDX`
 func TestParseStrongWithNestedElements(t *testing.T) {
 	input := "**Extreme `coding` time**"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
+	validateLength(t, len(elements), 1)
 
 	if strong, ok := elements[0].(*bold); ok {
-		if len(strong.Content) != 3 {
-			fail(t, fmt.Sprintf("Expected 3 bold children, got=%d", len(strong.Content)))
-			t.FailNow()
-		}
+		validateLength(t, len(strong.Content), 3)
 
 		if frag, ok := strong.Content[0].(*fragment); ok {
 			if frag.String != "Extreme " {
@@ -530,12 +441,7 @@ func TestParseStrongWithNestedElements(t *testing.T) {
 func TestParseEm(t *testing.T) {
 	input := "*slinky*"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if em, ok := element.(*italic); ok {
@@ -552,12 +458,7 @@ func TestParseEmBetweenElements(t *testing.T) {
 *slinky*
 MDX`
 	elements := execute(t, input)
-
-	if len(elements) != 3 {
-		fail(t, fmt.Sprintf("Expected 3 elements, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 3)
 	element := elements[1]
 
 	if em, ok := element.(*italic); ok {
@@ -572,18 +473,11 @@ MDX`
 func TestParseEmWithNestedElements(t *testing.T) {
 	input := "*speedy `coding` session*"
 	elements := execute(t, input)
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-		t.FailNow()
-	}
-
+	validateLength(t, len(elements), 1)
 	element := elements[0]
 
 	if em, ok := element.(*italic); ok {
-		if len(em.Content) != 3 {
-			fail(t, fmt.Sprintf("Expected 3 Em children, got=%d", len(em.Content)))
-		}
+		validateLength(t, len(em.Content), 3)
 
 		if f, ok := em.Content[0].(*fragment); ok {
 			if f.String != "speedy " {
@@ -615,7 +509,76 @@ func TestParseEmWithNestedElements(t *testing.T) {
 
 // TODO: Block Quote tests
 func TestParseBlockQuote(t *testing.T) {
-	// input := "> Quote me"
+	input := "> Quote me"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
+
+	if quote, ok := element.(*blockQuote); ok {
+		if quote.InnerHtml() != "Quote me" {
+			fail(t, fmt.Sprintf("Expected blockQuote text='Quote me', got='%s'", quote.InnerHtml()))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
+	}
+}
+
+func TestParseBlockQuoteBetweenElements(t *testing.T) {
+	input := `# Head
+ > Quote
+
+ MDX`
+	elements := execute(t, input)
+	validateLength(t, len(elements), 3)
+	element := elements[1]
+
+	if quote, ok := element.(*blockQuote); ok {
+		if quote.InnerHtml() != "Quote" {
+			fail(t, fmt.Sprintf("Expected blockQuote text='Quote', got=%s", quote.InnerHtml()))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
+	}
+}
+
+func TestParseMultiLayerBlockQuote(t *testing.T) {
+	input := "> > Quote"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	first := elements[0]
+
+	if quote, ok := first.(*blockQuote); ok {
+		validateLength(t, len(quote.Content), 1)
+
+		second := quote.Content[0]
+
+		if innerQuote, ok := second.(*blockQuote); ok {
+			validateLength(t, len(innerQuote.Content), 1)
+
+			if frag, ok := innerQuote.Content[0].(*fragment); ok {
+				if frag.String != "Quote" {
+					fail(t, fmt.Sprintf("Expected fragment text='Quote', got='%s'", frag.String))
+				}
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected BlockQuote child, got=%T", second))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", first))
+	}
+}
+
+// **Disclaimer**: this test is all kinds of fucked
+// first blockquote objet is giving outrageous number of children because of empty fragment added
+// If it's ever fixed this test case will start failing, but just update the test
+// second blockQuote is somehow nested in another blockQuote ???
+// html is rendering as expected so not sure why the ast is so fucked
+func TestParseBlockQuoteWithNestedElements(t *testing.T) {
+	// input := `> Quote
+	// **stronk**
+	// > > Nested
+	// > >
+	// > > Separated`
 	// elements := execute(t, input)
 
 	// if len(elements) != 1 {
@@ -625,115 +588,242 @@ func TestParseBlockQuote(t *testing.T) {
 
 	// element := elements[0]
 
-	// if quote, ok := element.(*blockQuote); ok {
-	// 	if quote.InnerHtml() != "Quote me" {
-	// 		fail(t, fmt.Sprintf("Expected blockQuote text='Quote me', got='%s'", quote.InnerHtml()))
-	// 	}
-	// } else {
-	// 	fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
-	// }
-}
-
-func TestParseBlockQuoteBetweenElements(t *testing.T) {
-	// 	input := `# Head
-	// > Quote
-
-	// MDX`
-	// 	elements := execute(t, input)
-
-	// 	if len(elements) != 4 {
-	// 		fail(t, fmt.Sprintf("Expected 4 elements, got=%d", len(elements)))
+	// if first, ok := element.(*blockQuote); ok {
+	// 	if len(first.Content) != 7 {
+	// 		fail(t, fmt.Sprintf("Expected 7 (3) elements, got=%d", len(first.Content)))
+	// 		fmt.Printf("%q\n", first.Content)
 	// 		t.FailNow()
 	// 	}
 
-	// 	element := elements[1]
+	// 	if firstFrag, ok := first.Content[0].(*fragment); ok {
+	// 		if firstFrag.String != "Quote" {
+	// 			fail(t, fmt.Sprintf("Expected fragment text='Quote ', got='%s'", firstFrag.String))
+	// 		}
+	// 	} else {
+	// 		fail(t, fmt.Sprintf("Expected Fragment, got=%T", first.Content[0]))
+	// 	}
 
-	//	if quote, ok := element.(*blockQuote); ok {
-	//		if quote.InnerHtml() != "Quote" {
-	//			fail(t, fmt.Sprintf("Expected blockQuote text='Quote', got=%s", quote.InnerHtml()))
-	//		}
-	//	} else {
-	//
-	//		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", element))
-	//	}
-}
+	// 	if stronk, ok := first.Content[3].(*bold); ok {
+	// 		if len(stronk.Content) != 1 {
+	// 			fail(t, fmt.Sprintf("Expected 1 bold child, got=%d", len(stronk.Content)))
+	// 			t.FailNow()
+	// 		}
 
-func TestParseMultiLayerBlockQuote(t *testing.T) {
-	// input := "> > Quote"
-	// elements := execute(t, input)
+	// 		if stronkFrag, ok := stronk.Content[0].(*fragment); ok {
+	// 			if stronkFrag.String != "stronk" {
+	// 				fail(t, fmt.Sprintf("Expected bold text='stronk', got='%s'", stronkFrag.String))
+	// 			}
+	// 		} else {
+	// 			fail(t, fmt.Sprintf("Expected Fragment, got=%T", stronk.Content[0]))
+	// 		}
+	// 	} else {
+	// 		fail(t, fmt.Sprintf("Expected Fragment, got=%T", first.Content[3]))
+	// 	}
 
-	// if len(elements) != 1 {
-	// 	fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	// 	t.FailNow()
+	// 	// wtf is causing double blockquotes??
+	// 	if second, ok := first.Content[6].(*blockQuote).Content[0].(*blockQuote); ok {
+	// 		fmt.Printf("%T\n", second)
+	// 		if len(second.Content) != 7 {
+	// 			fmt.Printf("%q\n", second.Content)
+	// 			fail(t, fmt.Sprintf("Expected 7 (3) second children, got=%d", len(second.Content)))
+	// 			t.FailNow()
+	// 		}
+
+	// 		if firstInner, ok := second.Content[0].(*fragment); ok {
+	// 			if firstInner.String != "Nested" {
+	// 				fail(t, fmt.Sprintf("Expected second text='Nested', got='%s'", firstInner.String))
+	// 			}
+	// 		} else {
+	// 			fail(t, fmt.Sprintf("Expected Fragment, got=%T", second.Content[0]))
+	// 		}
+
+	// 		if _, ok := second.Content[1].(*lineBreak); !ok {
+	// 			fail(t, fmt.Sprintf("Expected LineBreak, got=%T", second.Content[1]))
+	// 		}
+
+	// 		if thirdInner, ok := second.Content[2].(*fragment); ok {
+	// 			if thirdInner.String != "Nested" {
+	// 				fail(t, fmt.Sprintf("Expected second text='Nested', got='%s'", thirdInner.String))
+	// 			}
+	// 		} else {
+	// 			fail(t, fmt.Sprintf("Expected Fragment, got=%T", second.Content[6]))
+	// 		}
+	// 	} else {
+	// 		fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", first))
+	// 	}
+	// } else {
+	// 	fail(t, fmt.Sprintf("Expected BlockQuote, got=%T", first))
 	// }
-
 }
 
-func TestParseBlockQuoteWithNestedElements(t *testing.T) {
-	// 	input := `> Quote
-	// **stronk**
-	// > > Nested`
-	// 	elements := execute(t, input)
+func TestParseOrderedList(t *testing.T) {
+	input := `1. First
+2. Second`
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
-	//	if len(elements) != 1 {
-	//		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	//	}
-}
+	if list, ok := element.(*orderedList); ok {
+		validateLength(t, len(list.ListItems), 2)
 
-// TODO: List Item tests
-func TestParseListItem(t *testing.T) {
+		first := list.ListItems[0]
+		if p, ok := first.Component.(*paragraph); ok {
+			validateLength(t, len(p.Content), 1)
 
-}
+			if pText, ok := p.Content[0].(*fragment); ok {
+				if pText.String != "First" {
+					fail(t, fmt.Sprintf("Expected item text='First', got='%s'", pText.String))
+				}
+			} else {
+				fail(t, fmt.Sprintf("Expected fragment, got=%T", p.Content[0]))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected paragraph list item, got=%T", first.Component))
+		}
 
-func TestParseListItemBetweenElements(t *testing.T) {
+		second := list.ListItems[1]
+		if p, ok := second.Component.(*paragraph); ok {
+			validateLength(t, len(p.Content), 1)
 
-}
-
-func TestParseListItemWithNestedElements(t *testing.T) {
-
+			if pText, ok := p.Content[0].(*fragment); ok {
+				if pText.String != "Second" {
+					fail(t, fmt.Sprintf("Expected item text='Second', got='%s'", pText.String))
+				}
+			} else {
+				fail(t, fmt.Sprintf("Expected fragment, got=%T", p.Content[0]))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected paragraph list item, got=%T", second.Component))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected OrderedList, got=%T", element))
+	}
 }
 
 // TODO: Ordered List tests
-func TestParseOrderedList(t *testing.T) {
-
-}
-
 func TestParseOrderedListBetweenElements(t *testing.T) {
 
 }
 
-// TODO: Unordered List tests
 func TestParseUnorderedList(t *testing.T) {
+	input := `- First
+- Second`
 
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
+
+	if list, ok := element.(*unorderedList); ok {
+		validateLength(t, len(list.ListItems), 2)
+
+		first := list.ListItems[0]
+		if p, ok := first.Component.(*paragraph); ok {
+			validateLength(t, len(p.Content), 1)
+
+			if pText, ok := p.Content[0].(*fragment); ok {
+				if pText.String != "First" {
+					fail(t, fmt.Sprintf("Expected item text='First', got='%s'", pText.String))
+				}
+			} else {
+				fail(t, fmt.Sprintf("Expected fragment, got=%T", p.Content[0]))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected paragraph list item, got=%T", first.Component))
+		}
+
+		second := list.ListItems[1]
+		if p, ok := second.Component.(*paragraph); ok {
+			validateLength(t, len(p.Content), 1)
+
+			if pText, ok := p.Content[0].(*fragment); ok {
+				if pText.String != "Second" {
+					fail(t, fmt.Sprintf("Expected item text='Second', got='%s'", pText.String))
+				}
+			} else {
+				fail(t, fmt.Sprintf("Expected fragment, got=%T", p.Content[0]))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected paragraph list item, got=%T", second.Component))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected OrderedList, got=%T", element))
+	}
 }
 
+// TODO: Unordered List tests
 func TestParseUnorderedListBetweenElements(t *testing.T) {
 
 }
 
-// TODO: Image tests
-func TesParsetImage(t *testing.T) {
+func TesParseImage(t *testing.T) {
+	input := "![Image](https://imgurl.com)"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if img, ok := element.(*image); ok {
+		if img.AltText != "Image" {
+			fail(t, fmt.Sprintf("Expected Image AltText='Image', got='%s'", img.AltText))
+		}
+
+		if img.ImgUrl != "https://imgurl.com" {
+			fail(t, fmt.Sprintf("Expected Image AltText='https://imgurl.com', got='%s'", img.ImgUrl))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected Image, got=%T", element))
+	}
 }
 
+// TODO: Image tests
 func TestParseImageBetweenElements(t *testing.T) {
 
 }
 
-// TODO: Horizontal Rule tests
 func TestParseHorizontalRule(t *testing.T) {
+	input := "---"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if _, ok := element.(*horizontalRule); !ok {
+		fail(t, fmt.Sprintf("Expected HorizontalRule, got=%T", element))
+	}
+
+	input = "___"
+	elements = execute(t, input)
+	validateLength(t, len(elements), 1)
+	element = elements[0]
+
+	if _, ok := element.(*horizontalRule); !ok {
+		fail(t, fmt.Sprintf("Expected HorizontalRule, got=%T", element))
+	}
 }
 
+// TODO: Horizontal Rule tests
 func TestParseHorizontalRuleBetweenElements(t *testing.T) {
 
 }
 
-// TODO: Link tests
 func TestParseLink(t *testing.T) {
+	input := "[Text](https://linkurl.com)"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if link, ok := element.(*link); ok {
+		if link.Text != "Text" {
+			fail(t, fmt.Sprintf("Expected Link text='Text', got='%s'", link.Text))
+		}
+
+		if link.Url != "https://linkurl.com" {
+			fail(t, fmt.Sprintf("Expected Link Url='https://linkurl.com', got='%s'", link.Url))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected Link, got=%T", element))
+	}
 }
 
+// TODO: Link tests
 func TestParseLinkBetweenElements(t *testing.T) {
 
 }
@@ -742,11 +832,28 @@ func TestParseLinkWithNestedElements(t *testing.T) {
 
 }
 
-// TODO: Button tests
 func TestParseButton(t *testing.T) {
+	input := "~[Click Me](handleClick)"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if button, ok := element.(*button); ok {
+		if button.OnClick != "handleClick" {
+			fail(t, fmt.Sprintf("Expected OnClick='handleClick', got='%s'", button.OnClick))
+		}
+
+		if frag, ok := button.Child.(*fragment); ok {
+			if frag.String != "Click Me" {
+				fail(t, fmt.Sprintf("Expected button child text='Click Me', got='%s'", frag.String))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected fragment, got=%T", button.Child))
+		}
+	}
 }
 
+// TODO: Button tests
 func TestParseButtonBetweenElements(t *testing.T) {
 
 }
@@ -759,22 +866,12 @@ func TestParseDiv(t *testing.T) {
 	input := `[
     Hello
 ]`
-	lex := newLexer(input)
-	parser := newParser(lex)
-	elements, parseErr := parser.parse(eof)
-	if parseErr != nil {
-		fail(t, parseErr.Error())
-	}
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	}
-
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
 	element := elements[0]
+
 	if div, ok := element.(*div); ok {
-		if len(div.Children) != 1 {
-			fail(t, fmt.Sprintf("Exected one child, got=%d", len(div.Children)))
-		}
+		validateLength(t, len(div.Children), 1)
 	} else {
 		fail(t, fmt.Sprintf("Expected Div type, got=%T", element))
 	}
@@ -784,32 +881,48 @@ func TestParseDiv(t *testing.T) {
 ]
 
 `
-	lex = newLexer(input)
-	parser = newParser(lex)
-	elements, parseErr = parser.parse(eof)
-	if parseErr != nil {
-		fail(t, parseErr.Error())
-	}
-
-	if len(elements) != 1 {
-		fail(t, fmt.Sprintf("Expected 1 element, got=%d", len(elements)))
-	}
-
+	elements = execute(t, input)
+	validateLength(t, len(elements), 1)
 	element = elements[0]
+
 	if div, ok := element.(*div); ok {
-		if len(div.Children) != 1 {
-			fail(t, fmt.Sprintf("Exected one child, got=%d", len(div.Children)))
-		}
+		validateLength(t, len(div.Children), 1)
 	} else {
 		fail(t, fmt.Sprintf("Expected Div type, got=%T", element))
 	}
 }
 
-// TODO: Nav tests
 func TestParseNav(t *testing.T) {
+	input := "@ Navigate @"
+	elements := execute(t, input)
 
+	validateLength(t, len(elements), 1)
+
+	element := elements[0]
+
+	if nav, ok := element.(*nav); ok {
+		validateLength(t, len(nav.Children), 1)
+
+		child := nav.Children[0]
+		if p, ok := child.(*paragraph); ok {
+			validateLength(t, len(p.Content), 1)
+
+			if frag, ok := p.Content[0].(*fragment); ok {
+				if frag.String != "Navigate " {
+					fail(t, fmt.Sprintf("Expected Nav text='Navigate ', got='%s'", frag.String))
+				}
+			} else {
+				fail(t, fmt.Sprintf("Expected fragment, got=%T", child))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected fragment, got=%T", child))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected Nav, got=%T", element))
+	}
 }
 
+// TODO: Nav tests
 func TestParseNavBetweenElements(t *testing.T) {
 
 }
@@ -818,11 +931,29 @@ func TestParseNavWithNestedElements(t *testing.T) {
 
 }
 
-// TODO: Span tests
 func TestParseSpan(t *testing.T) {
+	input := " $ span $"
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if span, ok := element.(*span); ok {
+		validateLength(t, len(span.Children), 1)
+
+		child := span.Children[0]
+		if frag, ok := child.(*fragment); ok {
+			if frag.String != "span" {
+				fail(t, fmt.Sprintf("Expected text='span', got='%s'", frag.String))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected fragment, got=%T", child))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected Span, got=%T", element))
+	}
 }
 
+// TODO: Span tests
 func TestParseSpanBetweenElements(t *testing.T) {
 
 }
@@ -831,28 +962,31 @@ func TestParseSpanWithNestedElements(t *testing.T) {
 
 }
 
-// TODO: Code Block tests
 func TestParseCodeBlock(t *testing.T) {
+	input := `^^
+func main() {
+	fmt.Println("Hello, world!")
+}
+^^`
+	elements := execute(t, input)
+	validateLength(t, len(elements), 1)
+	element := elements[0]
 
+	if codeBlock, ok := element.(*codeBlock); ok {
+		expectedCode := "func main() {\\n    fmt.Println(\"Hello, world!\")\\n}"
+		if codeBlock.Content != expectedCode {
+			fail(t, fmt.Sprintf("Expected content='%s', got='%s'", expectedCode, codeBlock.Content))
+		}
+	} else {
+		fail(t, fmt.Sprintf("Expected CodeBlock, got=%T", element))
+	}
 }
 
+// TODO: Code Block tests
 func TestParseCodeBlockBetweenElements(t *testing.T) {
 
 }
 
 func TestParseCodeBlockWithNestedElements(t *testing.T) {
-
-}
-
-// TODO: Body tests (needed?)
-func TestParseBody(t *testing.T) {
-
-}
-
-func TestParseBodyBetweenElements(t *testing.T) {
-
-}
-
-func TestParseBodyWithNestedElements(t *testing.T) {
 
 }
