@@ -22,7 +22,7 @@ func TestFragment(t *testing.T) {
 		t.Errorf("Fragment wrong, got=%q", fragmentHtml)
 	}
 
-	fragment.String = "Hello"
+	fragment.Value = "Hello"
 	fragmentHtml = fragment.Html()
 	expected = "Hello"
 	if fragmentHtml != expected {
@@ -31,14 +31,14 @@ func TestFragment(t *testing.T) {
 }
 
 func TestHeader(t *testing.T) {
-	h1 := header{Level: 1, Content: []component{&fragment{String: "Test"}}}
+	h1 := header{Level: 1, Content: []component{&fragment{Value: "Test"}}}
 	headerHtml := h1.Html()
 	expected := "<h1>Test</h1>"
 	if headerHtml != expected {
 		t.Errorf("Header wrong, got=%q", headerHtml)
 	}
 
-	h1 = header{Level: 2, Content: []component{&fragment{String: "Test2"}}}
+	h1 = header{Level: 2, Content: []component{&fragment{Value: "Test2"}}}
 	headerHtml = h1.Html()
 	expected = "<h2>Test2</h2>"
 	if headerHtml != expected {
@@ -46,7 +46,7 @@ func TestHeader(t *testing.T) {
 	}
 
 	properties := defaultProps(t)
-	h1 = header{Level: 6, Content: []component{&fragment{String: "Test with Props"}}, Properties: properties}
+	h1 = header{Level: 6, Content: []component{&fragment{Value: "Test with Props"}}, Properties: properties}
 	headerHtml = h1.Html()
 	expected = "<h6 class=\"test\" style=\"background-color: red\">Test with Props</h6>"
 	if headerHtml != expected {
@@ -55,7 +55,7 @@ func TestHeader(t *testing.T) {
 }
 
 func TestParagraph(t *testing.T) {
-	paragraph := paragraph{Content: []component{&fragment{String: "Paragraph test"}}}
+	paragraph := paragraph{Content: []component{&fragment{Value: "Paragraph test"}}}
 	paragraphHtml := paragraph.Html()
 	expected := "<p>Paragraph test</p>"
 	if paragraphHtml != expected {
@@ -80,7 +80,7 @@ func TestCode(t *testing.T) {
 }
 
 func TestBold(t *testing.T) {
-	bold := bold{Content: []component{&fragment{String: "stronk"}}}
+	bold := bold{Content: []component{&fragment{Value: "stronk"}}}
 	boldHtml := bold.Html()
 	expected := "<strong>stronk</strong>"
 	if boldHtml != expected {
@@ -96,7 +96,7 @@ func TestBold(t *testing.T) {
 }
 
 func TestItalic(t *testing.T) {
-	italic := italic{Content: []component{&fragment{String: "italian"}}}
+	italic := italic{Content: []component{&fragment{Value: "italian"}}}
 	italicHtml := italic.Html()
 	expected := "<em>italian</em>"
 	if italicHtml != expected {
@@ -112,7 +112,7 @@ func TestItalic(t *testing.T) {
 }
 
 func TestBlockQuote(t *testing.T) {
-	blockquote := blockQuote{Content: []component{&fragment{String: "quote"}}}
+	blockquote := blockQuote{Content: []component{&fragment{Value: "quote"}}}
 	blockquoteHtml := blockquote.Html()
 	expected := "<blockquote>quote</blockquote>"
 	if blockquoteHtml != expected {
@@ -128,7 +128,7 @@ func TestBlockQuote(t *testing.T) {
 }
 
 func TestListItem(t *testing.T) {
-	listItem := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
+	listItem := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
 	listItemHtml := listItem.Html()
 	expected := "<li><p>Item #1</p></li>"
 	if listItemHtml != expected {
@@ -144,8 +144,8 @@ func TestListItem(t *testing.T) {
 }
 
 func TestOrderedList(t *testing.T) {
-	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
-	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #2"}}}}
+	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
+	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
 	list := orderedList{ListItems: listItems, Start: 1}
 	listHtml := list.Html()
@@ -164,8 +164,8 @@ func TestOrderedList(t *testing.T) {
 }
 
 func TestUnorderedList(t *testing.T) {
-	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #1"}}}}
-	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{String: "Item #2"}}}}
+	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
+	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
 	list := unorderedList{ListItems: listItems}
 	listHtml := list.Html()
@@ -228,7 +228,7 @@ func TestLink(t *testing.T) {
 }
 
 func TestButton(t *testing.T) {
-	button := button{OnClick: "handleClick", Child: &paragraph{Content: []component{&fragment{String: "Click Me"}}}}
+	button := button{OnClick: "handleClick", Content: []component{&paragraph{Content: []component{&fragment{Value: "Click Me"}}}}}
 	buttonHtml := button.Html()
 	expected := "<button onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
 	if buttonHtml != expected {
@@ -259,7 +259,7 @@ func TestDiv(t *testing.T) {
 		t.Errorf("Property Div wrong, got=%q", divHtml)
 	}
 
-	p := &paragraph{Content: []component{&fragment{String: "child"}}}
+	p := &paragraph{Content: []component{&fragment{Value: "child"}}}
 	childDiv := div{Children: []component{p}}
 	divHtml = childDiv.Html()
 	expected = "<div>\n    <p>child</p>\n</div>"
@@ -299,7 +299,7 @@ func TestSpan(t *testing.T) {
 		t.Errorf("Span wrong, got=%q", spanHtml)
 	}
 
-	span.Children = []component{&paragraph{Content: []component{&fragment{String: "Hello"}}}}
+	span.Children = []component{&paragraph{Content: []component{&fragment{Value: "Hello"}}}}
 	spanHtml = span.Html()
 	expected = "<span><p>Hello</p></span>"
 	if spanHtml != expected {

@@ -1,10 +1,13 @@
 package mdx
 
+import "bytes"
+
 type lexer struct {
 	input        string
 	position     int
 	readPosition int
 	ch           byte
+	prevToken    tokenType
 }
 
 func newLexer(input string) *lexer {
@@ -80,20 +83,38 @@ func (l *lexer) nextToken() token {
 	case 0:
 		tok = newToken(eof, "")
 	default:
-		if isDigit(l.ch) && l.peekChar() == '.' {
-			// TODO: This only works for single digits
-			// maybe change this later in case some psycho starts the list as an insane number
-			tok = newToken(listelement, string(l.ch)+".")
-			l.readChar()
-			l.readChar()
+		if isDigit(l.ch) {
+			numberBuffer := bytes.Buffer{}
+			numberBuffer.WriteByte(l.ch)
+			for isDigit(l.peekChar()) {
+				l.readChar()
+				numberBuffer.WriteByte(l.ch)
+			}
+
+			if l.peekChar() == '.' {
+				if l.prevToken == newline || l.prevToken == "" {
+					tok = newToken(listelement, numberBuffer.String()+".")
+					l.readChar()
+					l.readChar()
+				} else {
+					l.readChar()
+					tok = newToken(word, numberBuffer.String())
+				}
+			} else {
+				l.readChar()
+				wordToken := l.readWord()
+				tok = newToken(word, numberBuffer.String()+wordToken)
+			}
 		} else {
 			wordToken := l.readWord()
 			tok = newToken(word, wordToken)
 		}
+		l.prevToken = tok.Type
 		return tok
 	}
 
 	l.readChar()
+	l.prevToken = tok.Type
 	return tok
 }
 

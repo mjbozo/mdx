@@ -16,11 +16,15 @@ type property struct {
 }
 
 type fragment struct {
-	String string
+	Value string
 }
 
 func (f *fragment) Html() string {
-	return fmt.Sprintf("%s", f.String)
+	return fmt.Sprintf("%s", f.Value)
+}
+
+func (f *fragment) String() string {
+	return fmt.Sprintf("Fragment[%s]", f.Value)
 }
 
 type lineBreak struct{}
@@ -76,6 +80,10 @@ func (p *paragraph) Html() string {
 	}
 
 	return fmt.Sprintf("<p%s>%s</p>", propertyString, p.InnerHtml())
+}
+
+func (p *paragraph) String() string {
+	return fmt.Sprintf("Paragraph[%q]", p.Content)
 }
 
 type code struct {
@@ -248,8 +256,17 @@ func (l *link) Html() string {
 
 type button struct {
 	Properties []property
-	Child      component
-	OnClick    string
+	// Child      component
+	Content []component
+	OnClick string
+}
+
+func (b *button) InnerHtml() string {
+	var contentString string
+	for _, child := range b.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (b *button) Html() string {
@@ -257,7 +274,7 @@ func (b *button) Html() string {
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<button%s onclick=\"%s()\">\n    %s\n</button>", propertyString, b.OnClick, b.Child.Html())
+	return fmt.Sprintf("<button%s onclick=\"%s()\">\n    %s\n</button>", propertyString, b.OnClick, b.InnerHtml())
 }
 
 type div struct {
