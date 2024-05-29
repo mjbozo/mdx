@@ -20,9 +20,7 @@ func (e *invalidFileError) Error() string {
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
 // TODO: Unordered lists should ignore all whitespace between list components
 // TODO: Unordered list can't be immediately followed by horizontal rule
-// TODO: Button child is hard coded as fragment, doesn't read child components yet
 // TODO: Div doesn't return fragment when no closing bracket exists
-// TODO: Bold breaks if not closed properly: double closing token not supported
 // TODO: Review where fragment can be replaced with paragraph => more friendly for styling
 
 // Transform .mdx or .md file into HTML string.

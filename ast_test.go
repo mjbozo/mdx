@@ -14,7 +14,7 @@ func defaultProps(t *testing.T) []property {
 	return properties
 }
 
-func TestFragment(t *testing.T) {
+func TestAstFragmentHtml(t *testing.T) {
 	fragment := fragment{}
 	fragmentHtml := fragment.Html()
 	expected := ""
@@ -30,7 +30,7 @@ func TestFragment(t *testing.T) {
 	}
 }
 
-func TestHeader(t *testing.T) {
+func TestAstHeaderHtml(t *testing.T) {
 	h1 := header{Level: 1, Content: []component{&fragment{Value: "Test"}}}
 	headerHtml := h1.Html()
 	expected := "<h1>Test</h1>"
@@ -54,7 +54,7 @@ func TestHeader(t *testing.T) {
 	}
 }
 
-func TestParagraph(t *testing.T) {
+func TestAstParagraphHtml(t *testing.T) {
 	paragraph := paragraph{Content: []component{&fragment{Value: "Paragraph test"}}}
 	paragraphHtml := paragraph.Html()
 	expected := "<p>Paragraph test</p>"
@@ -63,7 +63,7 @@ func TestParagraph(t *testing.T) {
 	}
 }
 
-func TestCode(t *testing.T) {
+func TestAstCodeHtml(t *testing.T) {
 	code := code{Text: "fmt.Printf(\"Hello, world!\n\")"}
 	codeHtml := code.Html()
 	expected := "<code>fmt.Printf(\"Hello, world!\n\")</code>"
@@ -79,7 +79,7 @@ func TestCode(t *testing.T) {
 	}
 }
 
-func TestBold(t *testing.T) {
+func TestAstBoldHtml(t *testing.T) {
 	bold := bold{Content: []component{&fragment{Value: "stronk"}}}
 	boldHtml := bold.Html()
 	expected := "<strong>stronk</strong>"
@@ -95,7 +95,7 @@ func TestBold(t *testing.T) {
 	}
 }
 
-func TestItalic(t *testing.T) {
+func TestAstItalicHtml(t *testing.T) {
 	italic := italic{Content: []component{&fragment{Value: "italian"}}}
 	italicHtml := italic.Html()
 	expected := "<em>italian</em>"
@@ -111,7 +111,7 @@ func TestItalic(t *testing.T) {
 	}
 }
 
-func TestBlockQuote(t *testing.T) {
+func TestAstBlockQuoteHtml(t *testing.T) {
 	blockquote := blockQuote{Content: []component{&fragment{Value: "quote"}}}
 	blockquoteHtml := blockquote.Html()
 	expected := "<blockquote>quote</blockquote>"
@@ -127,7 +127,7 @@ func TestBlockQuote(t *testing.T) {
 	}
 }
 
-func TestListItem(t *testing.T) {
+func TestAstListItemHtml(t *testing.T) {
 	listItem := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
 	listItemHtml := listItem.Html()
 	expected := "<li><p>Item #1</p></li>"
@@ -143,7 +143,7 @@ func TestListItem(t *testing.T) {
 	}
 }
 
-func TestOrderedList(t *testing.T) {
+func TestAstOrderedListHtml(t *testing.T) {
 	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
 	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
@@ -163,7 +163,7 @@ func TestOrderedList(t *testing.T) {
 	}
 }
 
-func TestUnorderedList(t *testing.T) {
+func TestAstUnorderedListHtml(t *testing.T) {
 	listItem1 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #1"}}}}
 	listItem2 := listItem{Component: &paragraph{Content: []component{&fragment{Value: "Item #2"}}}}
 	listItems := []listItem{listItem1, listItem2}
@@ -182,7 +182,7 @@ func TestUnorderedList(t *testing.T) {
 	}
 }
 
-func TestImage(t *testing.T) {
+func TestAstImageHtml(t *testing.T) {
 	img := image{ImgUrl: "https://img.pokemondb.net/artwork/avif/regirock.avif", AltText: "Reginald"}
 	imgHtml := img.Html()
 	expected := "<img src=\"https://img.pokemondb.net/artwork/avif/regirock.avif\" alt=\"Reginald\"/>"
@@ -195,7 +195,7 @@ func TestImage(t *testing.T) {
 	expected = "<img class=\"test\" style=\"background-color: red\" src=\"https://img.pokemondb.net/artwork/avif/regirock.avif\" alt=\"Reginald\"/>"
 }
 
-func TestHorizontalRule(t *testing.T) {
+func TestAstHorizontalRuleHtml(t *testing.T) {
 	rule := horizontalRule{}
 	ruleHtml := rule.Html()
 	expected := "<hr/>"
@@ -211,8 +211,8 @@ func TestHorizontalRule(t *testing.T) {
 	}
 }
 
-func TestLink(t *testing.T) {
-	link := link{Url: "https://google.com", Text: "Google"}
+func TestAstLinkHtml(t *testing.T) {
+	link := link{Url: "https://google.com", Content: []component{&fragment{Value: "Google"}}}
 	linkHtml := link.Html()
 	expected := "<a href=\"https://google.com\">Google</a>"
 	if linkHtml != expected {
@@ -227,7 +227,7 @@ func TestLink(t *testing.T) {
 	}
 }
 
-func TestButton(t *testing.T) {
+func TestAstButtonHtml(t *testing.T) {
 	button := button{OnClick: "handleClick", Content: []component{&paragraph{Content: []component{&fragment{Value: "Click Me"}}}}}
 	buttonHtml := button.Html()
 	expected := "<button onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
@@ -243,7 +243,7 @@ func TestButton(t *testing.T) {
 	}
 }
 
-func TestDiv(t *testing.T) {
+func TestAstDivHtml(t *testing.T) {
 	emptyDiv := div{}
 	divHtml := emptyDiv.Html()
 	expected := "<div/>"
@@ -268,7 +268,7 @@ func TestDiv(t *testing.T) {
 	}
 }
 
-func TestNav(t *testing.T) {
+func TestAstNavHtml(t *testing.T) {
 	nav := nav{}
 	navHtml := nav.Html()
 	expected := "<nav/>"
@@ -283,7 +283,7 @@ func TestNav(t *testing.T) {
 		t.Errorf("Nav properties wrong, got=%q", navHtml)
 	}
 
-	nav.Children = []component{&link{Url: "https://test.com", Text: "Test"}}
+	nav.Children = []component{&link{Url: "https://test.com", Content: []component{&fragment{Value: "Test"}}}}
 	navHtml = nav.Html()
 	expected = "<nav class=\"test\" style=\"background-color: red\">\n    <a href=\"https://test.com\">Test</a>\n</nav>"
 	if navHtml != expected {
@@ -291,7 +291,7 @@ func TestNav(t *testing.T) {
 	}
 }
 
-func TestSpan(t *testing.T) {
+func TestAstSpanHtml(t *testing.T) {
 	span := span{}
 	spanHtml := span.Html()
 	expected := "<span/>"
@@ -299,7 +299,7 @@ func TestSpan(t *testing.T) {
 		t.Errorf("Span wrong, got=%q", spanHtml)
 	}
 
-	span.Children = []component{&paragraph{Content: []component{&fragment{Value: "Hello"}}}}
+	span.Content = []component{&paragraph{Content: []component{&fragment{Value: "Hello"}}}}
 	spanHtml = span.Html()
 	expected = "<span><p>Hello</p></span>"
 	if spanHtml != expected {
@@ -307,7 +307,7 @@ func TestSpan(t *testing.T) {
 	}
 }
 
-func TestCodeBlock(t *testing.T) {
+func TestAstCodeBlockHtml(t *testing.T) {
 	content := `package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, world!")\n}`
 	codeBlock := codeBlock{Content: content}
 	codeBlockHtml := codeBlock.Html()

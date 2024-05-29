@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestNextToken(t *testing.T) {
+func TestLexerNextToken(t *testing.T) {
 	input := `# Heading
 Paragraph section
 

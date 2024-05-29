@@ -19,12 +19,12 @@ type fragment struct {
 	Value string
 }
 
-func (f *fragment) Html() string {
-	return fmt.Sprintf("%s", f.Value)
+func (f *fragment) String() string {
+	return fmt.Sprintf("Fragment{%s}", f.Value)
 }
 
-func (f *fragment) String() string {
-	return fmt.Sprintf("Fragment[%s]", f.Value)
+func (f *fragment) Html() string {
+	return fmt.Sprintf("%s", f.Value)
 }
 
 type lineBreak struct{}
@@ -65,6 +65,14 @@ type paragraph struct {
 	Content    []component
 }
 
+func (p *paragraph) String() string {
+	var contentString string
+	for _, child := range p.Content {
+		contentString += fmt.Sprintf("%s ", child)
+	}
+	return fmt.Sprintf("Paragraph{Content=[%s]}", strings.TrimSpace(contentString))
+}
+
 func (p *paragraph) InnerHtml() string {
 	var contentString string
 	for _, child := range p.Content {
@@ -80,10 +88,6 @@ func (p *paragraph) Html() string {
 	}
 
 	return fmt.Sprintf("<p%s>%s</p>", propertyString, p.InnerHtml())
-}
-
-func (p *paragraph) String() string {
-	return fmt.Sprintf("Paragraph[%q]", p.Content)
 }
 
 type code struct {
@@ -243,7 +247,15 @@ func (hr *horizontalRule) Html() string {
 type link struct {
 	Properties []property
 	Url        string
-	Text       string
+	Content    []component
+}
+
+func (l *link) InnerHtml() string {
+	var contentString string
+	for _, child := range l.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (l *link) Html() string {
@@ -251,14 +263,21 @@ func (l *link) Html() string {
 	for _, property := range l.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<a%s href=\"%s\">%s</a>", propertyString, l.Url, l.Text)
+	return fmt.Sprintf("<a%s href=\"%s\">%s</a>", propertyString, l.Url, l.InnerHtml())
 }
 
 type button struct {
 	Properties []property
-	// Child      component
-	Content []component
-	OnClick string
+	Content    []component
+	OnClick    string
+}
+
+func (b *button) String() string {
+	var contentString string
+	for _, child := range b.Content {
+		contentString += fmt.Sprintf("%s ", child)
+	}
+	return fmt.Sprintf("Button{OnClick='%s', Content=[%s]}", b.OnClick, strings.TrimSpace(contentString))
 }
 
 func (b *button) InnerHtml() string {
@@ -280,6 +299,14 @@ func (b *button) Html() string {
 type div struct {
 	Properties []property
 	Children   []component
+}
+
+func (d *div) String() string {
+	var contentString string
+	for _, child := range d.Children {
+		contentString += fmt.Sprintf("%s ", child)
+	}
+	return fmt.Sprintf("Div{Children=[%s]}", strings.TrimSpace(contentString))
 }
 
 func (d *div) Html() string {
@@ -329,27 +356,28 @@ func (n *nav) Html() string {
 
 type span struct {
 	Properties []property
-	Children   []component
+	Content    []component
+}
+
+func (s *span) InnerHtml() string {
+	var contentString string
+	for _, child := range s.Content {
+		contentString += child.Html()
+	}
+	return contentString
 }
 
 func (s *span) Html() string {
-	var spanString string
 	var propertyString string
 	for _, property := range s.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
 
-	if len(s.Children) == 0 {
+	if len(s.Content) == 0 {
 		return fmt.Sprintf("<span%s/>", propertyString)
 	}
 
-	spanString += fmt.Sprintf("<span%s>", propertyString)
-	for _, child := range s.Children {
-		spanString += fmt.Sprintf("%s", child.Html())
-	}
-	spanString += fmt.Sprintf("</span>")
-
-	return spanString
+	return fmt.Sprintf("<span%s>%s</span>", propertyString, s.InnerHtml())
 }
 
 type codeBlock struct {

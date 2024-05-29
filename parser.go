@@ -6,16 +6,14 @@ import (
 	"strings"
 )
 
-// TODO: Properly handle nested components
-
 type parser struct {
-	l          *lexer
+	lex        *lexer
 	currentTok token
 	nextTok    token
 }
 
 func newParser(lex *lexer) *parser {
-	parser := &parser{l: lex}
+	parser := &parser{lex: lex}
 	parser.nextToken()
 	parser.nextToken()
 	return parser
@@ -32,7 +30,7 @@ func (p *parseError) Error() string {
 
 func (p *parser) nextToken() {
 	p.currentTok = p.nextTok
-	p.nextTok = p.l.nextToken()
+	p.nextTok = p.lex.nextToken()
 }
 
 func (p *parser) peekToken() *token {
@@ -222,9 +220,7 @@ func (p *parser) parseProperties() ([]property, error, string) {
 			}
 
 			p.nextToken()
-			// propsString += p.currentTok.Literal
 			value := p.currentTok.Literal
-
 			props = append(props, property{Name: key, Value: value})
 		}
 
@@ -254,17 +250,22 @@ func (p *parser) parseTextLine(closing tokenType) string {
 	return lineString
 }
 
+// Appends a fragment containing fragmentValue to the lineElements slice after replacing '\\n' with spaces.
+// Subsequently sets fragmentValue to an empty string.
+func bankCurrentFragment(lineElements *[]component, fragmentValue *string) {
+	if len(*fragmentValue) > 0 {
+		*lineElements = append(*lineElements, &fragment{Value: strings.ReplaceAll(*fragmentValue, "\\n", " ")})
+		*fragmentValue = ""
+	}
+}
+
 func (p *parser) parseLine(closing tokenType) []component {
 	lineElements := make([]component, 0)
 	var lineString string
 
 	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
 		if p.currentTok.IsElementToken() {
-			if len(lineString) > 0 {
-				lineElements = append(lineElements, &fragment{Value: lineString})
-				lineString = ""
-			}
-
+			bankCurrentFragment(&lineElements, &lineString)
 			lineElements = append(lineElements, p.parseComponent(nil, closing))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
@@ -272,22 +273,18 @@ func (p *parser) parseLine(closing tokenType) []component {
 				lineString += propsText
 				p.nextToken()
 			} else {
-				if len(lineString) > 0 {
-					lineElements = append(lineElements, &fragment{Value: lineString})
-					lineString = ""
-				}
+				bankCurrentFragment(&lineElements, &lineString)
 				lineElements = append(lineElements, p.parseComponent(properties, closing))
 			}
 		} else {
-			lineString += p.currentTok.Literal
+			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
+				lineString += p.currentTok.Literal
+			}
 			p.nextToken()
 		}
 	}
 
-	if len(lineString) > 0 {
-		lineElements = append(lineElements, &fragment{Value: lineString})
-	}
-
+	bankCurrentFragment(&lineElements, &lineString)
 	return lineElements
 }
 
@@ -297,11 +294,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 
 	for !(p.curTokenIs(newline) || (p.curTokenIs(closing) && p.peekTokenIs(closing))) {
 		if p.currentTok.IsElementToken() {
-			if len(lineString) > 0 {
-				lineElements = append(lineElements, &fragment{Value: lineString})
-				lineString = ""
-			}
-
+			bankCurrentFragment(&lineElements, &lineString)
 			lineElements = append(lineElements, p.parseComponent(nil, closing))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
@@ -309,10 +302,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 				lineString += propsText
 				p.nextToken()
 			} else {
-				if len(lineString) > 0 {
-					lineElements = append(lineElements, &fragment{Value: lineString})
-					lineString = ""
-				}
+				bankCurrentFragment(&lineElements, &lineString)
 				lineElements = append(lineElements, p.parseComponent(properties, closing))
 			}
 		} else {
@@ -321,10 +311,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 		}
 	}
 
-	if len(lineString) > 0 {
-		lineElements = append(lineElements, &fragment{Value: lineString})
-	}
-
+	bankCurrentFragment(&lineElements, &lineString)
 	return lineElements
 }
 
@@ -334,11 +321,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 
 	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
 		if p.currentTok.IsElementToken() {
-			if len(blockString) > 0 {
-				blockElements = append(blockElements, &fragment{Value: strings.ReplaceAll(blockString, "\\n", " ")})
-				blockString = ""
-			}
-
+			bankCurrentFragment(&blockElements, &blockString)
 			blockElements = append(blockElements, p.parseComponent(nil, closing))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
@@ -346,22 +329,18 @@ func (p *parser) parseBlock(closing tokenType) []component {
 				blockString += propsText
 				p.nextToken()
 			} else {
-				if len(blockString) > 0 {
-					blockElements = append(blockElements, &fragment{Value: strings.ReplaceAll(blockString, "\\n", " ")})
-					blockString = ""
-				}
+				bankCurrentFragment(&blockElements, &blockString)
 				blockElements = append(blockElements, p.parseComponent(properties, closing))
 			}
 		} else {
-			blockString += p.currentTok.Literal
+			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
+				blockString += p.currentTok.Literal
+			}
 			p.nextToken()
 		}
 	}
 
-	if len(blockString) > 0 {
-		blockElements = append(blockElements, &fragment{Value: strings.ReplaceAll(blockString, "\\n", " ")})
-	}
-
+	bankCurrentFragment(&blockElements, &blockString)
 	return blockElements
 }
 
@@ -470,8 +449,8 @@ func (p *parser) parseBlockQuote(properties []property, closing tokenType, initi
 		content = append(content, lineContent...)
 		p.nextToken()
 
-		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			// double newline or eof
+		if p.curTokenIs(newline) || p.curTokenIs(eof) || p.curTokenIs(closing) {
+			// double newline or eof or closing tag
 			break
 		}
 
@@ -626,18 +605,17 @@ func (p *parser) parseDiv(properties []property, closing tokenType) component {
 func (p *parser) parseLink(properties []property, closing tokenType) component {
 	p.nextToken()
 
-	var displayText string
-	for !p.curTokenIs(rbracket) {
-		displayText += p.currentTok.Literal
-		p.nextToken()
-
-		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "[" + displayText}
-		}
+	components, err := p.parse(rbracket)
+	if err != nil {
+		panic(err.Error())
 	}
 
 	if !p.peekTokenIs(lparen) {
-		return &fragment{Value: "[" + displayText + "]"}
+		content := make([]component, 0)
+		content = append(content, &fragment{Value: "["})
+		content = append(content, components...)
+		content = append(content, &fragment{Value: "]"})
+		return &paragraph{Content: content}
 	}
 
 	p.nextToken()
@@ -649,11 +627,26 @@ func (p *parser) parseLink(properties []property, closing tokenType) component {
 		p.nextToken()
 
 		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "[" + displayText + "](" + urlString}
+			content := make([]component, 0)
+			content = append(content, &fragment{Value: "["})
+			content = append(content, components...)
+			content = append(content, &fragment{Value: "](" + urlString})
+			return &paragraph{Content: content}
 		}
 	}
 
-	return &link{Properties: properties, Url: urlString, Text: displayText}
+	// if only child is a simple paragraph, replace with a fragment for cleaner output
+	if len(components) == 1 {
+		if p, ok := components[0].(*paragraph); ok {
+			if len(p.Content) == 1 {
+				if frag, ok := p.Content[0].(*fragment); ok {
+					components = []component{frag}
+				}
+			}
+		}
+	}
+
+	return &link{Properties: properties, Url: urlString, Content: components}
 }
 
 func (p *parser) parseShortLink(properties []property, closing tokenType) component {
@@ -669,7 +662,7 @@ func (p *parser) parseShortLink(properties []property, closing tokenType) compon
 		}
 	}
 
-	return &link{Properties: properties, Url: urlString, Text: urlString}
+	return &link{Properties: properties, Url: urlString, Content: []component{&fragment{Value: urlString}}}
 }
 
 func (p *parser) parseButton(properties []property, closing tokenType) component {
@@ -701,7 +694,6 @@ func (p *parser) parseButton(properties []property, closing tokenType) component
 			content = append(content, components...)
 			content = append(content, &fragment{Value: "](" + onClick})
 			return &paragraph{Content: content}
-			// return &fragment{Value: "~[" + buttonLabel + "](" + onClick}
 		}
 	}
 
@@ -730,27 +722,25 @@ func (p *parser) parseNav(properties []property, closing tokenType) component {
 func (p *parser) parseSpan(properties []property, closing tokenType) component {
 	if p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
+		p.nextToken()
 		return &fragment{Value: content}
 	}
 
 	p.nextToken()
-	var spanString string
-
-	for !p.curTokenIs(dollar) {
-		spanString += p.currentTok.Literal
+	for p.curTokenIs(space) {
 		p.nextToken()
+	}
+	content := p.parseLine(dollar)
 
-		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			fragment := &fragment{Value: spanString}
-			prefixFragment(fragment, "$", closing)
-			return fragment
+	// remove trailing whitespace if last component is fragment
+	if len(content) > 0 {
+		if frag, ok := content[len(content)-1].(*fragment); ok {
+			frag.Value = strings.TrimRight(frag.Value, " ")
 		}
 	}
 
-	children := []component{&fragment{Value: strings.TrimSpace(spanString)}}
-
 	p.nextToken()
-	return &span{Properties: properties, Children: children}
+	return &span{Properties: properties, Content: content}
 }
 
 func (p *parser) parseCodeBlock(properties []property, closing tokenType) component {
