@@ -214,14 +214,14 @@ func TestAstHorizontalRuleHtml(t *testing.T) {
 func TestAstLinkHtml(t *testing.T) {
 	link := link{Url: "https://google.com", Content: []component{&fragment{Value: "Google"}}}
 	linkHtml := link.Html()
-	expected := "<a href=\"https://google.com\">Google</a>"
+	expected := "<a href=\"https://google.com\" target=_blank>Google</a>"
 	if linkHtml != expected {
 		t.Errorf("Link wrong, got=%q", linkHtml)
 	}
 
 	link.Properties = defaultProps(t)
 	linkHtml = link.Html()
-	expected = "<a class=\"test\" style=\"background-color: red\" href=\"https://google.com\">Google</a>"
+	expected = "<a class=\"test\" style=\"background-color: red\" href=\"https://google.com\" target=_blank>Google</a>"
 	if linkHtml != expected {
 		t.Errorf("Link properties wrong, got=%q", linkHtml)
 	}
@@ -285,7 +285,7 @@ func TestAstNavHtml(t *testing.T) {
 
 	nav.Children = []component{&link{Url: "https://test.com", Content: []component{&fragment{Value: "Test"}}}}
 	navHtml = nav.Html()
-	expected = "<nav class=\"test\" style=\"background-color: red\">\n    <a href=\"https://test.com\">Test</a>\n</nav>"
+	expected = "<nav class=\"test\" style=\"background-color: red\">\n    <a href=\"https://test.com\" target=_blank>Test</a>\n</nav>"
 	if navHtml != expected {
 		t.Errorf("Nav children wrong, got=%q", navHtml)
 	}

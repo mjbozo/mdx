@@ -1,165 +1,355 @@
-~[$ Click Me $](handleClick)
-~[[ Click Me ]](handleClick)
-~[Click Me](handleClick)
-
-// @
-// [ # Title ]
-// [
-// 	> Test
-// ]
-// @
-
 @
-[ [Home](#home)[Account](#account) ]
 [
-	# Title
-]
-[
-	[More Buttons](#more)
+	# MDX Samples
 ]
 @
+
 { .class=content }
 [
-# Hello I'm a Heading with a { .class=test } *slinky* tag inside?!
-This is a paragraph!
+# Welcome
+Welcome to the MDX Samples Page. This page will serve as both a starting point for referencing the extra syntax that
+comes with MDX, as well as reference point to see how components are behaving as development of the standard continues.
 
-*inline elements* followed by text on same line gets separated :(
+This entire page is written using MDX, and the source code can be found [here](https://github.com/mjbozo/mdx/tree/main/examples).
 
+The following is an assortment of MDX components.
 
-Okay now I'm a **paragraph** with { .class=rainbow } $goodies$ *inside* me :O
+> Note: Some examples have had styling applied to better showcase the output.
 
-{ .class=test }
-This is also a paragraph! :O
-# Followed by a h1
+# Properties
+**Properties** are the reason for MDX's existence. They allow you to enhance the markdown by adding detail which will
+be converted to HTML attributes along with the content.
 
-This is a new paragraph which should not have class of test.
-But is made up of multiple lines
+MDX properties are contained in squirly braces `{}` and are parsed as key-value pairs, and are directly
+inserted in the resulting HTML of the following component.
 
-`code me`
-### Heading again but diff
+Multiple properties can be added by simply space separating them.
 
-**STRONK** mode
+###### Example
+^^
+{ .class=content .data-index=0 }
+This component will be have it's HTML generated with a class of 'content' and data attribute 'index' = 0.
+^^
 
-*what*
+{ .class=example-output } [
+	{ .class=example-tag } Produces
 
-*bye***bye**
-
-> Quote me
-
-> **stronk**
-> but continued
-> > What about this
-
-> One
-> > Two
-> > > Three
->
-> One again
-
-> > Double start
->
-> Now one
+	{ .class=container .data-index=0 }
+	This component will be have it's HTML generated with a class of 'container' and data attribute 'index' = 0.
+]
 
 
-> > > Triple nipple
-> > >
-> > > continued
+# Headings
+**Headings** are parsed by starting a line with `#`. Up to 6 `#`s can be specified to create tags `h1` through `h6`.
 
-> Multi line
-without symbol
+###### Example
+^^
+# Heading
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	# Heading
+]
 
 
-okay
+# Paragraphs
+**Paragraphs** are created by starting a new line with normal text. They are the default tag for blocks of text.
 
-> Quote
-**stronk**
-> > Nested
-> >
-> > Separated
+###### Example
+^^
+This is a normal paragraph.
+^^
 
-1. First
-2. Second
-6. Third
+{ .class=example-output } [
+	{ .class=example-tag } Produces
 
-- One
-- Two
-- Three
+	This is a normal paragraph.
+]
 
----
+# Spans
+**Spans** are created by surrounding elements in `$` symbols. They can be useful for adding some { .class=rainbow }
+$ style $ to in-line text.
+
+###### Example
+^^
+$ This is a span $
+This is a block of text $ containing a span $ in the middle.
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	$ This is a span $
+	This is a block of text $ containing a span $ in the middle.
+]
+
+# Divs
+**Divs** can be created by surrounding content in square brackets `[]` and are useful for giving structure to the page.
+
+###### Example
+^^
+[ Simple div on a single line ]
+[
+	# Complex div
+	Can have multiple children
+	[ And even nested divs ]
+]
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	{ .class=example-div }
+	[ Simple div on a single line ]
+
+	{ .class=example-div }
+	[
+		# Complex div
+		Can have multiple children
+
+		{ .class=example-div }
+		[ And even nested divs ]
+	]
+]
+
+
+# Buttons
+**Buttons** are denoted by the syntax `~[Content](callbackFunction)`. Button Content can consist of simple text or a
+series of child components. The callback function is simply the name of the function to be called on button click.
+
+###### Example
+^^
+~[Click Me](handleClick)
+
+~[Click Me, { .class=rainbow } $ I dare you $](handleClick)
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	~[Click Me](handleClick)
+	~[Click Me, { .class=rainbow } $ I dare you $](handleClick)
+]
+
+
+# Links
+**Links** can be added in two different ways. A link can be added to appear 'as-is' by enclosing it in angle
+brackets `<>`. For more control over formatting, the second notation can be used: `[Content](url)`.
+
+###### Example
+^^
+<pre style="display: inline"><</pre>https://ko-fi.com/mattbourke>
+[Buy me a coffee (please)](https://ko-fi.com/mattbourke)
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	<https://ko-fi.com/mattbourke>
+	[Buy me a coffee (please)](https://ko-fi.com/mattbourke)
+]
+
+
+# Images
+**Images** can be inserted with the syntax `![Alt Text](imageUrl)`.
+
+###### Example
+^^
+![MDX Logo](https://github.com/mjbozo/mdx/blob/main/mdx-logo.png?raw=true)
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	{ .style=width:200px }![MDX Logo](https://github.com/mjbozo/mdx/blob/main/mdx-logo.png?raw=true)
+]
+
+
+# Code Blocks
+**Code Blocks** are areas you can write multiline pieces of code which will retain formatting. The content is written
+between pairs of double carets `^^`. All the examples on this page are done using Code Block components.
+
+###### Example
+^^
+<pre style="display: inline">^</pre>^
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello, MDX!")
+}
+<pre style="display: inline">^</pre>^
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
 
 ^^
 package main
+
 import "fmt"
+
 func main() {
-	fmt.Printf("Hello, world")
+	fmt.Println("Hello, MDX!")
 }
 ^^
-
-{ .class=primary-btn }
-~[Click Me](handleClick)
-
-![Reginald](https://img.pokemondb.net/artwork/avif/regirock.avif)
-
-[
-	What about now
-
-	# Header me
-]
-
-[Google](https://www.google.com)
-# Hello
-{ .class=container }
-[
-	## Section
-	{ .class=content .data-parent=container }
-	Zuzzy
-]
-
-<https://github.com>
-
-Hello there `console.log('hello, world')` javascript
-
-{ .class=inside } $ya mum$.
-
-bepis
-
-hello { .class=groovy } $ world $
-
-**intense `coding` session**
-
-
-121 324507. Hi
-
-1. Hi
-2. There
-
-123. Big number
-
-123.123 wha
-
-123h123. poo
-
-Hello 2
-
-~[[ Click Me ]](handleClick)
-
-
-And the answer was 69. How crazy!
-
-*hello
 ]
 
 
-# Header
-1. first
-2. second
-Poo
-## Another
+# Code
+**Code** components are inline versions of code, which are enclosed by backticks
+{ .style=color:red } $ (need backslash working to display backtick in a code component) $.
 
-**what is this
-doing here
+###### Example
+^^
+`console.log("Hello, MDX")`
+^^
 
-- one
-- two
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	`console.log("Hello, MDX")`
+]
+
+
+# Lists
+**Lists** can be rendered as both ordered and unordered lists by prefixing the list elements numerically or wish dashes.
+
+###### Example
+^^
+1. First ordered element
+2. Second ordered element
+...
+
+- First unordered element
+- Second unordered element
+...
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+1. First ordered element
+2. Second ordered element
+
+- First unordered element
+- Second unordered element
+]
+
+
+# Strong (bold)
+**Strong** components are inline text components that give text a bold look. They are written in MDX by surrounding the
+text in double asterisks `**`.
+
+###### Example
+^^
+Adding some **emphasis** to my docs.
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	Adding some **emphasis** to my docs.
+]
+
+
+# Em (italic)
+**Em** components are also inline text components, but italicise the text instead. They are written by enclosing text
+in single asterisks `*`.
+
+###### Example
+^^
+These docs are getting *zuzzy* as hell.
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	These docs are getting *zuzzy* as hell.
+]
+
+
+# Block Quotes
+**Block Quotes** can also be added by prefixing text with a greater than angle bracket `>`. They can also be nested.
+
+###### Example
+^^
+> Single level block quote
+
+> First layer
+> > And second layer block quote
+> >
+> > with a second line
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+> Single level block quote
+
+> First layer
+> > And second layer block quote
+> >
+> > with a second line
+]
+
+
+# Nav
+**Nav** elements can be added by enclosing other components in a pair of `@` characters.
+
+###### Example
+^^
+@
+	[ Section 1 ]
+	[ Section 2 ]
+	[ Section 3 ]
+@
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	@
+		[ Section 1 ]
+		[ Section 2 ]
+		[ Section 3 ]
+	@
+]
+
+
+# Horizontal Rules
+**Horizontal Rules** are added by inserting 3 dashes `-` or underscores `_` in a row.
+
+###### Example
+^^
 ---
 
+___
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	---
+
+	{ .style=margin-top:16px } ___
+]
+
+
+# Comments
+**Comments** are also supported in MDX, simply by prefixing the line with 2 backslashes `//`. Comments do not get
+rendered to the HTML output.
+
+###### Example
+^^
+// This is a comment
+^^
+
+{ .class=example-output } [
+	{ .class=example-tag } Produces
+
+	// This is a comment
+]

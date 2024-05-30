@@ -897,7 +897,7 @@ func TestParseLinkBetweenElements(t *testing.T) {
 [Link](https://linkurl.com)
 > Quote`
 	elements := execute(t, input)
-	validateLength(t, len(elements), 4) // this is 4 because line break after link
+	validateLength(t, len(elements), 3)
 	element := elements[1]
 
 	if link, ok := element.(*link); ok {

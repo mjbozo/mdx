@@ -13,9 +13,10 @@ func (e *invalidFileError) Error() string {
 	return "Invalid file type. File must have .md or .mdx extension"
 }
 
+// TODO: Nil pointer deferencing happening when components are indenting
 // TODO: Format HTML correctly when generating file
 // TODO: Code block formatting
-// TODO: Consolidation / cleanup step after AST first built
+// TODO: Consolidation / cleanup step after AST first built - starting line with inline component does not join to following paragraph
 // TODO: Parsing backslash
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
 // TODO: Unordered lists should ignore all whitespace between list components

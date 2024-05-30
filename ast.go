@@ -263,7 +263,7 @@ func (l *link) Html() string {
 	for _, property := range l.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<a%s href=\"%s\">%s</a>", propertyString, l.Url, l.InnerHtml())
+	return fmt.Sprintf("<a%s href=\"%s\" target=_blank>%s</a>", propertyString, l.Url, l.InnerHtml())
 }
 
 type button struct {

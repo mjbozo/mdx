@@ -646,6 +646,7 @@ func (p *parser) parseLink(properties []property, closing tokenType) component {
 		}
 	}
 
+	p.nextToken()
 	return &link{Properties: properties, Url: urlString, Content: components}
 }
 

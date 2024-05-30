@@ -4,11 +4,16 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
+}
+
+.content h1 {
+  font-size: 24px;
+  margin: 32px 0 8px 0;
 }
 
 nav {
-  height: 42px;
+  height: 64px;
   background-color: lightblue;
   padding: 8px;
   padding-left: 16px;
@@ -19,16 +24,20 @@ nav {
   position: sticky;
   top: 0;
   z-index: 1;
+  border-bottom: 2px solid #70a5b5;
+  box-shadow: 0px 8px 40px 20px white;
 }
 
 button {
+  display: block;
   cursor: pointer;
   border: none;
-  background-color: green;
-  color: white;
+  background-color: #d7e0e7;
+  color: black;
   padding: 8px;
   border-radius: 4px;
   margin: 16px;
+  box-shadow: 1px 2px 4px 1px #00000042;
 }
 
 a {
@@ -45,7 +54,7 @@ nav a {
 .content {
   margin: 24px auto;
   margin-bottom: 50vh;
-  width: clamp(120px, 80%, 600px);
+  width: clamp(120px, 80%, 800px);
 }
 
 ul {
@@ -68,6 +77,7 @@ blockquote {
 }
 
 .code-block {
+  font-size: 12px;
   display: block;
   border-radius: 4px;
   position: relative;
@@ -75,17 +85,67 @@ blockquote {
   overflow-x: auto;
   scrollbar-width: thin;
   line-height: 1.5em;
-  border: 1px solid orange;
+  border: 1px solid #52b51d;
   padding: 16px;
 }
 
 .code-block pre {
-  font-family: monospace;
+  font-family: "Fira Code", monospace;
+  height: 1.5em;
 }
 
 code {
-  font-family: monospace;
-  background-color: #a1a1a1;
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  background-color: #c1c1c1;
   padding: 2px 4px;
   border-radius: 4px;
 }
+
+.rainbow {
+  background: teal;
+  background: linear-gradient(to right, orange, teal, blue);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  filter: drop-shadow(0px 0px 8px #ecef2f);
+}
+
+.example-output {
+  display: block;
+  border-radius: 4px;
+  position: relative;
+  margin: 16px 0;
+  scrollbar-width: thin;
+  line-height: 1.5em;
+  border: 1px solid teal;
+  padding: 16px;
+}
+
+.example-tag {
+  position: absolute;
+  font-size: 11px;
+  top: -12px;
+  background: white;
+  padding: 0 6px;
+}
+
+.example-div {
+  margin: 4px;
+  background-color: #aaaaaa33;
+  border-radius: 2px;
+  padding: 8px;
+}
+
+ol {
+  margin-left: 16px;
+}
+
+ul {
+  margin-left: 16px;
+  list-style: disc;
+}
+
+ h6 {
+   font-size: 12px;
+ }
