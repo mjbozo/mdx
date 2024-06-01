@@ -1,4 +1,4 @@
-module mdx/examples
+module mdx_examples
 
 go 1.22.1
 

@@ -273,14 +273,62 @@ func (p *parser) parseLine(closing tokenType) []component {
 				lineString += propsText
 				p.nextToken()
 			} else {
+				for p.curTokenIs(tab) {
+					p.nextToken()
+				}
 				bankCurrentFragment(&lineElements, &lineString)
-				lineElements = append(lineElements, p.parseComponent(properties, closing))
+				nextComponent := p.parseComponent(properties, closing)
+				if nextComponent != nil {
+					lineElements = append(lineElements, nextComponent)
+				}
 			}
 		} else {
 			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
 				lineString += p.currentTok.Literal
 			}
 			p.nextToken()
+		}
+	}
+
+	bankCurrentFragment(&lineElements, &lineString)
+	return lineElements
+}
+
+func (p *parser) parseBlockQuoteLine(closing tokenType) []component {
+	lineElements := make([]component, 0)
+	var lineString string
+
+	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
+		if p.currentTok.IsElementToken() {
+			bankCurrentFragment(&lineElements, &lineString)
+			lineElements = append(lineElements, p.parseComponent(nil, closing))
+		} else if p.curTokenIs(lsquirly) {
+			properties, parseErr, propsText := p.parseProperties()
+			if parseErr != nil {
+				lineString += propsText
+				p.nextToken()
+			} else {
+				for p.curTokenIs(tab) {
+					p.nextToken()
+				}
+				bankCurrentFragment(&lineElements, &lineString)
+				nextComponent := p.parseComponent(properties, closing)
+				if nextComponent != nil {
+					lineElements = append(lineElements, nextComponent)
+				}
+			}
+		} else {
+			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
+				lineString += p.currentTok.Literal
+			}
+			p.nextToken()
+		}
+
+		if p.curTokenIs(newline) && p.peekTokenIs(tab) {
+			p.nextToken()
+			for p.curTokenIs(tab) {
+				p.nextToken()
+			}
 		}
 	}
 
@@ -302,12 +350,25 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 				lineString += propsText
 				p.nextToken()
 			} else {
+				for p.curTokenIs(tab) {
+					p.nextToken()
+				}
 				bankCurrentFragment(&lineElements, &lineString)
-				lineElements = append(lineElements, p.parseComponent(properties, closing))
+				nextComponent := p.parseComponent(properties, closing)
+				if nextComponent != nil {
+					lineElements = append(lineElements, nextComponent)
+				}
 			}
 		} else {
 			lineString += p.currentTok.Literal
 			p.nextToken()
+		}
+
+		if p.curTokenIs(newline) && p.peekTokenIs(tab) {
+			p.nextToken()
+			for p.curTokenIs(tab) {
+				p.nextToken()
+			}
 		}
 	}
 
@@ -329,14 +390,27 @@ func (p *parser) parseBlock(closing tokenType) []component {
 				blockString += propsText
 				p.nextToken()
 			} else {
+				for p.curTokenIs(tab) {
+					p.nextToken()
+				}
 				bankCurrentFragment(&blockElements, &blockString)
-				blockElements = append(blockElements, p.parseComponent(properties, closing))
+				nextComponent := p.parseComponent(properties, closing)
+				if nextComponent != nil {
+					blockElements = append(blockElements, nextComponent)
+				}
 			}
 		} else {
 			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
 				blockString += p.currentTok.Literal
 			}
 			p.nextToken()
+		}
+
+		if p.curTokenIs(newline) && p.peekTokenIs(tab) {
+			p.nextToken()
+			for p.curTokenIs(tab) {
+				p.nextToken()
+			}
 		}
 	}
 
@@ -445,7 +519,7 @@ func (p *parser) parseBlockQuote(properties []property, closing tokenType, initi
 	}
 
 	for !(p.curTokenIs(newline) || p.curTokenIs(eof)) {
-		lineContent := p.parseLine(closing)
+		lineContent := p.parseBlockQuoteLine(closing)
 		content = append(content, lineContent...)
 		p.nextToken()
 
