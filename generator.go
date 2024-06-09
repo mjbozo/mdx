@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 type GeneratorConfig struct {
@@ -14,14 +15,8 @@ type GeneratorConfig struct {
 }
 
 func transformMDX(elements []component) string {
-	// Note: Testing changing from body to div and putting more in the template.html
-	// body := &Body{Children: elements}
 	body := &div{Children: elements}
 	htmlString := body.Html()
-	// var htmlString string
-	// for _, element := range elements {
-	// 	htmlString += element.html()
-	// }
 	return htmlString
 }
 
@@ -36,17 +31,17 @@ func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 
 	file.WriteString(`<html>
     <head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<meta name="description" content="" />`)
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="description" content="" />`)
 
 	if len(config.Title) > 0 {
 		file.WriteString(fmt.Sprintf(`
-		<title>%s</title>`, config.Title))
+        <title>%s</title>`, config.Title))
 	}
 
 	for _, link := range config.Links {
-		linkString := "<link "
+		linkString := "\n        <link "
 		for name, value := range link {
 			if len(value) > 0 {
 				linkString += fmt.Sprintf("%s=\"%s\" ", name, value)
@@ -61,7 +56,7 @@ func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 `)
 
 	body := &body{Children: elements}
-	n, writeErr := file.WriteString(body.Html())
+	n, writeErr := file.WriteString(strings.ReplaceAll(body.Format(1), "\n\n", "\n"))
 	if writeErr != nil {
 		log.Printf(writeErr.Error())
 		return n, writeErr
