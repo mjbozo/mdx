@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+const INDENT = "    "
+const MAX_LENGTH = 120
+
 type ComponentType int
 
 const (
@@ -15,12 +18,12 @@ const (
 
 type component interface {
 	// Convert element to HTML representation
-	Html() string
+	Raw() string
 	Type() ComponentType
 
-	// Format method rendering html but indented appropriately
+	// Html method rendering html but indented appropriately
 	// Hoping for this to replace the Html method and make everything cleaner
-	Format(int) string
+	Html(int) string
 }
 
 type property struct {
@@ -36,7 +39,7 @@ func (f *fragment) String() string {
 	return fmt.Sprintf("Fragment{%s}", f.Value)
 }
 
-func (f *fragment) Html() string {
+func (f *fragment) Raw() string {
 	return fmt.Sprintf("%s", f.Value)
 }
 
@@ -44,7 +47,7 @@ func (f *fragment) Type() ComponentType {
 	return Inline
 }
 
-func (f *fragment) Format(indentLevel int) string {
+func (f *fragment) Html(indentLevel int) string {
 	indentPrefix := strings.Repeat(INDENT, indentLevel)
 	formattedOutput := indentPrefix + f.Value
 	return formattedOutput
@@ -52,7 +55,7 @@ func (f *fragment) Format(indentLevel int) string {
 
 type lineBreak struct{}
 
-func (lb *lineBreak) Html() string {
+func (lb *lineBreak) Raw() string {
 	return "<br/>"
 }
 
@@ -60,7 +63,7 @@ func (lb *lineBreak) Type() ComponentType {
 	return Block
 }
 
-func (lb *lineBreak) Format(indentLevel int) string {
+func (lb *lineBreak) Html(indentLevel int) string {
 	tag := "<br/>"
 	indentPrefix := strings.Repeat(INDENT, indentLevel)
 	formattedOutput := "\n" + indentPrefix + tag + "\n"
@@ -76,12 +79,12 @@ type header struct {
 func (h *header) InnerHtml() string {
 	var contentString string
 	for _, child := range h.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (h *header) Html() string {
+func (h *header) Raw() string {
 	if h.Level == 0 {
 		h.Level = 1
 	}
@@ -98,7 +101,7 @@ func (h *header) Type() ComponentType {
 	return Block
 }
 
-func (h *header) Format(indentLevel int) string {
+func (h *header) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range h.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -123,7 +126,7 @@ func (h *header) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range h.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -132,7 +135,7 @@ func (h *header) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -170,12 +173,12 @@ func (p *paragraph) String() string {
 func (p *paragraph) InnerHtml() string {
 	var contentString string
 	for _, child := range p.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (p *paragraph) Html() string {
+func (p *paragraph) Raw() string {
 	var propertyString string
 	for _, property := range p.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -188,7 +191,7 @@ func (p *paragraph) Type() ComponentType {
 	return Inline
 }
 
-func (p *paragraph) Format(indentLevel int) string {
+func (p *paragraph) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range p.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -213,7 +216,7 @@ func (p *paragraph) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range p.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -222,14 +225,14 @@ func (p *paragraph) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
 			// split the inline string and append each
 			lineLength := len(indentPrefix) + len(openingTag) + len(inlineString) + len(closingTag)
 			appendInlineString(inlineString, indentPrefix, lineLength, &formattedOutput)
-			inlineString = ""
+			formattedOutput += "\n" + indentPrefix
 		} else {
 			formattedOutput += indentPrefix
 		}
@@ -250,7 +253,7 @@ type code struct {
 	Text       string
 }
 
-func (c *code) Html() string {
+func (c *code) Raw() string {
 	var propertyString string
 	for _, property := range c.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -262,7 +265,7 @@ func (c *code) Type() ComponentType {
 	return Inline
 }
 
-func (c *code) Format(indentLevel int) string {
+func (c *code) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range c.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -281,12 +284,12 @@ type bold struct {
 func (b *bold) InnerHtml() string {
 	var contentString string
 	for _, child := range b.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (b *bold) Html() string {
+func (b *bold) Raw() string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -298,7 +301,7 @@ func (b *bold) Type() ComponentType {
 	return Inline
 }
 
-func (b *bold) Format(indentLevel int) string {
+func (b *bold) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -323,7 +326,7 @@ func (b *bold) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range b.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -332,7 +335,7 @@ func (b *bold) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -361,12 +364,12 @@ type italic struct {
 func (i *italic) InnerHtml() string {
 	var contentString string
 	for _, child := range i.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (i *italic) Html() string {
+func (i *italic) Raw() string {
 	var propertyString string
 	for _, property := range i.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -378,7 +381,7 @@ func (i *italic) Type() ComponentType {
 	return Inline
 }
 
-func (i *italic) Format(indentLevel int) string {
+func (i *italic) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range i.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -403,7 +406,7 @@ func (i *italic) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range i.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -412,7 +415,7 @@ func (i *italic) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -441,12 +444,12 @@ type blockQuote struct {
 func (bq *blockQuote) InnerHtml() string {
 	var contentString string
 	for _, child := range bq.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (bq *blockQuote) Html() string {
+func (bq *blockQuote) Raw() string {
 	var propertyString string
 	for _, property := range bq.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -458,7 +461,7 @@ func (bq *blockQuote) Type() ComponentType {
 	return Block
 }
 
-func (bq *blockQuote) Format(indentLevel int) string {
+func (bq *blockQuote) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range bq.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -483,7 +486,7 @@ func (bq *blockQuote) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range bq.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -492,7 +495,7 @@ func (bq *blockQuote) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -519,19 +522,19 @@ type listItem struct {
 	Component  component
 }
 
-func (li *listItem) Html() string {
+func (li *listItem) Raw() string {
 	var propertyString string
 	for _, property := range li.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<li%s>%s</li>", propertyString, li.Component.Html())
+	return fmt.Sprintf("<li%s>%s</li>", propertyString, li.Component.Raw())
 }
 
 func (li *listItem) Type() ComponentType {
 	return Block
 }
 
-func (li *listItem) Format(indentLevel int) string {
+func (li *listItem) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range li.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -544,10 +547,10 @@ func (li *listItem) Format(indentLevel int) string {
 	formattedOutput := indentPrefix + openingTag
 
 	if li.Component.Type() == Block {
-		formattedOutput += li.Component.Format(indentLevel + 1)
+		formattedOutput += li.Component.Html(indentLevel + 1)
 		formattedOutput += indentPrefix
 	} else {
-		inlineString := strings.Repeat(INDENT, indentLevel+1) + li.Component.Format(indentLevel+1)
+		inlineString := strings.Repeat(INDENT, indentLevel+1) + li.Component.Html(indentLevel+1)
 		lineLength := len(indentPrefix) + len(openingTag) + len(inlineString) + len(closingTag)
 		appendInlineString(inlineString, indentPrefix, lineLength, &formattedOutput)
 	}
@@ -563,7 +566,7 @@ type orderedList struct {
 	Start      int
 }
 
-func (ol *orderedList) Html() string {
+func (ol *orderedList) Raw() string {
 	var propertyString string
 	for _, property := range ol.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -571,7 +574,7 @@ func (ol *orderedList) Html() string {
 
 	var listItemString string
 	for _, item := range ol.ListItems {
-		listItemString += fmt.Sprintf("    %s\n", item.Html())
+		listItemString += fmt.Sprintf("    %s\n", item.Raw())
 	}
 
 	return fmt.Sprintf("<ol start=\"%d\"%s>\n%s</ol>", ol.Start, propertyString, listItemString)
@@ -581,7 +584,7 @@ func (ol *orderedList) Type() ComponentType {
 	return Block
 }
 
-func (ol *orderedList) Format(indentLevel int) string {
+func (ol *orderedList) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range ol.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -593,7 +596,7 @@ func (ol *orderedList) Format(indentLevel int) string {
 
 	formattedOutput := "\n" + indentPrefix + openingTag + "\n"
 	for _, item := range ol.ListItems {
-		formattedOutput += item.Format(indentLevel + 1)
+		formattedOutput += item.Html(indentLevel + 1)
 	}
 
 	formattedOutput += indentPrefix + closingTag + "\n"
@@ -606,7 +609,7 @@ type unorderedList struct {
 	ListItems  []listItem
 }
 
-func (ul *unorderedList) Html() string {
+func (ul *unorderedList) Raw() string {
 	var propertyString string
 	for _, property := range ul.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -614,7 +617,7 @@ func (ul *unorderedList) Html() string {
 
 	var listItemString string
 	for _, item := range ul.ListItems {
-		listItemString += fmt.Sprintf("    %s\n", item.Html())
+		listItemString += fmt.Sprintf("    %s\n", item.Raw())
 	}
 
 	return fmt.Sprintf("<ul%s>\n%s</ul>", propertyString, listItemString)
@@ -624,7 +627,7 @@ func (ul *unorderedList) Type() ComponentType {
 	return Block
 }
 
-func (ul *unorderedList) Format(indentLevel int) string {
+func (ul *unorderedList) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range ul.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -636,7 +639,7 @@ func (ul *unorderedList) Format(indentLevel int) string {
 
 	formattedOutput := "\n" + indentPrefix + openingTag + "\n"
 	for _, item := range ul.ListItems {
-		formattedOutput += item.Format(indentLevel + 1)
+		formattedOutput += item.Html(indentLevel + 1)
 	}
 
 	formattedOutput += indentPrefix + closingTag + "\n"
@@ -650,7 +653,7 @@ type image struct {
 	AltText    string
 }
 
-func (img *image) Html() string {
+func (img *image) Raw() string {
 	var propertyString string
 	for _, property := range img.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -662,7 +665,7 @@ func (img *image) Type() ComponentType {
 	return Block
 }
 
-func (img *image) Format(indentLevel int) string {
+func (img *image) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range img.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -679,7 +682,7 @@ type horizontalRule struct {
 	Properties []property
 }
 
-func (hr *horizontalRule) Html() string {
+func (hr *horizontalRule) Raw() string {
 	var propertyString string
 	for _, property := range hr.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -691,7 +694,7 @@ func (hr *horizontalRule) Type() ComponentType {
 	return Block
 }
 
-func (hr *horizontalRule) Format(indentLevel int) string {
+func (hr *horizontalRule) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range hr.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -713,12 +716,12 @@ type link struct {
 func (l *link) InnerHtml() string {
 	var contentString string
 	for _, child := range l.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (l *link) Html() string {
+func (l *link) Raw() string {
 	var propertyString string
 	for _, property := range l.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -730,7 +733,7 @@ func (l *link) Type() ComponentType {
 	return Inline
 }
 
-func (l *link) Format(indentLevel int) string {
+func (l *link) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range l.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -754,7 +757,7 @@ func (l *link) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range l.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -763,7 +766,7 @@ func (l *link) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -801,12 +804,12 @@ func (b *button) String() string {
 func (b *button) InnerHtml() string {
 	var contentString string
 	for _, child := range b.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (b *button) Html() string {
+func (b *button) Raw() string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -818,7 +821,7 @@ func (b *button) Type() ComponentType {
 	return Block
 }
 
-func (b *button) Format(indentLevel int) string {
+func (b *button) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -848,7 +851,7 @@ func (b *button) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range b.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -857,7 +860,7 @@ func (b *button) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -892,7 +895,7 @@ func (d *div) String() string {
 	return fmt.Sprintf("Div{Children=[%s]}", strings.TrimSpace(contentString))
 }
 
-func (d *div) Html() string {
+func (d *div) Raw() string {
 	var divString string
 	var propertyString string
 	for _, property := range d.Properties {
@@ -905,7 +908,7 @@ func (d *div) Html() string {
 
 	divString += fmt.Sprintf("<div%s>\n", propertyString)
 	for _, child := range d.Children {
-		divString += fmt.Sprintf("    %s\n", child.Html())
+		divString += fmt.Sprintf("    %s\n", child.Raw())
 	}
 	divString += "</div>"
 
@@ -916,7 +919,7 @@ func (d *div) Type() ComponentType {
 	return Block
 }
 
-func (d *div) Format(indentLevel int) string {
+func (d *div) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range d.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -932,7 +935,7 @@ func (d *div) Format(indentLevel int) string {
 		if child.Type() == Inline {
 			formattedOutput += strings.Repeat(INDENT, indentLevel+1)
 		}
-		formattedOutput += child.Format(indentLevel + 1)
+		formattedOutput += child.Html(indentLevel + 1)
 	}
 
 	formattedOutput += "\n" + indentPrefix + closingTag + "\n"
@@ -944,7 +947,7 @@ type nav struct {
 	Children   []component
 }
 
-func (n *nav) Html() string {
+func (n *nav) Raw() string {
 	var navString string
 	var propertyString string
 	for _, property := range n.Properties {
@@ -957,7 +960,7 @@ func (n *nav) Html() string {
 
 	navString += fmt.Sprintf("<nav%s>\n", propertyString)
 	for _, child := range n.Children {
-		navString += fmt.Sprintf("    %s\n", child.Html())
+		navString += fmt.Sprintf("    %s\n", child.Raw())
 	}
 	navString += "</nav>"
 
@@ -968,7 +971,7 @@ func (n *nav) Type() ComponentType {
 	return Block
 }
 
-func (n *nav) Format(indentLevel int) string {
+func (n *nav) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range n.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -984,7 +987,7 @@ func (n *nav) Format(indentLevel int) string {
 		if child.Type() == Inline {
 			formattedOutput += strings.Repeat(INDENT, indentLevel+1)
 		}
-		formattedOutput += child.Format(indentLevel + 1)
+		formattedOutput += child.Html(indentLevel + 1)
 	}
 
 	formattedOutput += "\n" + indentPrefix + closingTag + "\n"
@@ -999,12 +1002,12 @@ type span struct {
 func (s *span) InnerHtml() string {
 	var contentString string
 	for _, child := range s.Content {
-		contentString += child.Html()
+		contentString += child.Raw()
 	}
 	return contentString
 }
 
-func (s *span) Html() string {
+func (s *span) Raw() string {
 	var propertyString string
 	for _, property := range s.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -1021,7 +1024,7 @@ func (s *span) Type() ComponentType {
 	return Inline
 }
 
-func (s *span) Format(indentLevel int) string {
+func (s *span) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range s.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -1046,7 +1049,7 @@ func (s *span) Format(indentLevel int) string {
 		var inlineString string
 		for _, child := range s.Content {
 			if child.Type() == Inline {
-				inlineString += indentPrefix + INDENT + child.Html()
+				inlineString += indentPrefix + INDENT + child.Raw()
 			} else {
 				if len(inlineString) > 0 {
 					// split the inline string and append each
@@ -1055,7 +1058,7 @@ func (s *span) Format(indentLevel int) string {
 					inlineString = ""
 				}
 
-				formattedOutput += child.Format(indentLevel + 1)
+				formattedOutput += child.Html(indentLevel + 1)
 			}
 		}
 		if len(inlineString) > 0 {
@@ -1081,7 +1084,7 @@ type codeBlock struct {
 	Content    string
 }
 
-func (cb *codeBlock) Html() string {
+func (cb *codeBlock) Raw() string {
 	var codeBlockString string
 	var propertiesString string
 	for _, property := range cb.Properties {
@@ -1102,7 +1105,7 @@ func (cb *codeBlock) Type() ComponentType {
 	return Block
 }
 
-func (cb *codeBlock) Format(indentLevel int) string {
+func (cb *codeBlock) Html(indentLevel int) string {
 	var propertyString string
 	for _, property := range cb.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -1128,10 +1131,10 @@ type body struct {
 	Children []component
 }
 
-func (b *body) Html() string {
+func (b *body) Raw() string {
 	bodyString := "<body>\n"
 	for _, child := range b.Children {
-		bodyString += fmt.Sprintf("    %s\n", child.Html())
+		bodyString += fmt.Sprintf("    %s\n", child.Raw())
 	}
 	bodyString += "</body>"
 	return bodyString
@@ -1141,7 +1144,7 @@ func (b *body) Type() ComponentType {
 	return Block
 }
 
-func (b *body) Format(indentLevel int) string {
+func (b *body) Html(indentLevel int) string {
 	formattedOutput := "\n"
 	var indentPrefix string
 	for range indentLevel {
@@ -1158,7 +1161,7 @@ func (b *body) Format(indentLevel int) string {
 			formattedOutput += strings.Repeat(INDENT, indentLevel+1)
 		}
 
-		formattedOutput += child.Format(indentLevel + 1)
+		formattedOutput += child.Html(indentLevel + 1)
 	}
 
 	if len(b.Children) > 0 && b.Children[len(b.Children)-1].Type() == Inline {

@@ -189,7 +189,7 @@ func isBlockElement(comp component) bool {
 		*codeBlock,
 		*horizontalRule,
 		*image,
-		*button,
+		// *button, TODO: can this actually be treated as inline element?
 		*nav:
 		return true
 	}
@@ -771,6 +771,8 @@ func (p *parser) parseButton(properties []property, closing tokenType) component
 			return &paragraph{Content: content}
 		}
 	}
+
+	p.nextToken()
 
 	return &button{Properties: properties, OnClick: onClick, Content: components}
 }

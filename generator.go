@@ -15,8 +15,8 @@ type GeneratorConfig struct {
 }
 
 func transformMDX(elements []component) string {
-	body := &div{Children: elements}
-	htmlString := body.Html()
+	content := &div{Children: elements}
+	htmlString := content.Html(1)
 	return htmlString
 }
 
@@ -56,7 +56,7 @@ func generateHtml(elements []component, config *GeneratorConfig) (int, error) {
 `)
 
 	body := &body{Children: elements}
-	n, writeErr := file.WriteString(strings.ReplaceAll(body.Format(1), "\n\n", "\n"))
+	n, writeErr := file.WriteString(strings.ReplaceAll(body.Html(1), "\n\n", "\n"))
 	if writeErr != nil {
 		log.Printf(writeErr.Error())
 		return n, writeErr

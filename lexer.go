@@ -1,6 +1,8 @@
 package mdx
 
-import "bytes"
+import (
+	"bytes"
+)
 
 type lexer struct {
 	input        string

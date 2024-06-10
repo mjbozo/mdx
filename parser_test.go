@@ -619,7 +619,6 @@ func TestParseBlockQuoteWithNestedElements(t *testing.T) {
 
 		if second, ok := first.Content[3].(*blockQuote); ok {
 			if len(second.Content) != 3 {
-				fmt.Printf("%q\n", second.Content)
 				fail(t, fmt.Sprintf("Expected 3 second children, got=%d", len(second.Content)))
 				t.FailNow()
 			}
