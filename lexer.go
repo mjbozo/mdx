@@ -9,7 +9,7 @@ type lexer struct {
 	position     int
 	readPosition int
 	ch           byte
-	prevToken    tokenType
+	prevToken    token
 }
 
 func newLexer(input string) *lexer {
@@ -94,7 +94,7 @@ func (l *lexer) nextToken() token {
 			}
 
 			if l.peekChar() == '.' {
-				if l.prevToken == newline || l.prevToken == "" {
+				if l.prevToken.Type == newline || l.prevToken.Type == "" {
 					tok = newToken(listelement, numberBuffer.String()+".")
 					l.readChar()
 					l.readChar()
@@ -111,12 +111,12 @@ func (l *lexer) nextToken() token {
 			wordToken := l.readWord()
 			tok = newToken(word, wordToken)
 		}
-		l.prevToken = tok.Type
+		l.prevToken = tok
 		return tok
 	}
 
 	l.readChar()
-	l.prevToken = tok.Type
+	l.prevToken = tok
 	return tok
 }
 

@@ -7,9 +7,10 @@ import (
 )
 
 type parser struct {
-	lex        *lexer
-	currentTok token
-	nextTok    token
+	lex           *lexer
+	previousToken token
+	currentTok    token
+	nextTok       token
 }
 
 func newParser(lex *lexer) *parser {
@@ -29,6 +30,7 @@ func (p *parseError) Error() string {
 }
 
 func (p *parser) nextToken() {
+	p.previousToken = p.currentTok
 	p.currentTok = p.nextTok
 	p.nextTok = p.lex.nextToken()
 }
@@ -90,97 +92,126 @@ func (p *parser) parse(delim tokenType) ([]component, error) {
 }
 
 func (p *parser) parseComponent(properties []property, closing tokenType) component {
-	var component component
+	previousToken := p.previousToken
+
+	var element component
 
 	switch p.currentTok.Type {
 	case hash:
-		component = p.parseHeader(properties, closing)
+		element = p.parseHeader(properties, closing)
 	case word:
-		component = p.parseParagraph(properties, closing)
+		element = p.parseParagraph(properties, closing)
 	case backtick:
-		component = p.parseCode(properties, closing)
+		if p.peekTokenIs(backtick) {
+			element = p.parseCodeDouble(properties)
+		} else {
+			element = p.parseCode(properties)
+		}
 	case asterisk:
 		if p.peekTokenIs(asterisk) {
-			component = p.parseStrong(properties, closing)
+			element = p.parseStrong(properties, closing)
 		} else {
-			component = p.parseEm(properties, closing)
+			element = p.parseEm(properties, closing)
 		}
 	case gt:
-		component, _ = p.parseBlockQuote(properties, closing, 0)
+		element, _ = p.parseBlockQuote(properties, closing, 0)
 	case listelement:
-		component = p.parseOrderedListElement(properties, closing)
+		element = p.parseOrderedListElement(properties, closing)
 	case dash:
 		if p.peekTokenIs(space) {
-			component = p.parseUnorderedList(properties, closing)
+			element = p.parseUnorderedList(properties, closing)
 		} else if p.peekTokenIs(dash) {
 			p.nextToken()
 			if p.peekTokenIs(dash) {
-				component = &horizontalRule{Properties: properties}
+				element = &horizontalRule{Properties: properties}
 				p.nextToken()
 			} else {
-				component = p.parseFragment(properties, closing)
-				prefixFragment(component, "-", closing)
+				element = p.parseFragment(closing)
+				prefixFragment(element, "-")
 			}
 		} else {
-			component = p.parseFragment(properties, closing)
+			element = p.parseFragment(closing)
 		}
 	case bang:
 		if p.peekTokenIs(lbracket) {
-			component = p.parseImage(properties, closing)
+			element = p.parseImage(properties)
 		} else {
-			component = p.parseFragment(properties, closing)
+			element = p.parseFragment(closing)
 		}
 	case underscore:
 		if p.peekTokenIs(underscore) {
 			p.nextToken()
 			if p.peekTokenIs(underscore) {
-				component = &horizontalRule{Properties: properties}
+				element = &horizontalRule{Properties: properties}
 				p.nextToken()
 			} else {
-				component = p.parseFragment(properties, closing)
-				prefixFragment(component, "_", closing)
+				element = p.parseFragment(closing)
+				prefixFragment(element, "_")
 			}
 		} else {
-			component = p.parseFragment(properties, closing)
+			element = p.parseFragment(closing)
 		}
 	case lbracket:
 		if p.peekTokenIs(space) || p.peekTokenIs(newline) {
-			component = p.parseDiv(properties, closing)
+			element = p.parseDiv(properties)
 		} else {
-			component = p.parseLink(properties, closing)
+			element = p.parseLink(properties)
 		}
 	case lt:
-		component = p.parseShortLink(properties, closing)
+		element = p.parseShortLink(properties)
 	case tidle:
-		component = p.parseButton(properties, closing)
+		element = p.parseButton(properties)
 	case at:
-		component = p.parseNav(properties, closing)
+		element = p.parseNav(properties)
 	case dollar:
-		component = p.parseSpan(properties, closing)
+		element = p.parseSpan(properties, closing)
 	case caret:
 		if p.peekTokenIs(caret) {
-			component = p.parseCodeBlock(properties, closing)
+			element = p.parseCodeBlock(properties)
 		} else {
-			component = p.parseFragment(properties, closing)
+			element = p.parseFragment(closing)
 		}
 	case newline:
-		component = &lineBreak{}
+		// might be easier to just not render line breaks?
+		// element = &lineBreak{}
 	case slash:
 		if p.peekTokenIs(slash) {
 			p.parseComment()
 		} else {
-			component = p.parseFragment(properties, closing)
+			element = p.parseFragment(closing)
 		}
 	}
 
 	// if block component, skip newlines
-	if component != nil && isBlockElement(component) {
+	if element != nil && isBlockElement(element) {
 		for p.peekTokenIs(newline) {
 			p.nextToken()
 		}
 	}
 
-	return component
+	// if line starts with an inline element and is followed by a paragraph, wrap the first inline element
+	// in following paragraph
+	if joinsParagraph(element) && !p.curTokenIs(newline) && p.peekTokenIs(word) && previousToken.Type == newline {
+		pComponent := p.parseParagraph(nil, closing).(*paragraph)
+		paragraphChildren := append([]component{element}, pComponent.Content...)
+		pComponent.Content = paragraphChildren
+		element = pComponent
+	}
+
+	return element
+}
+
+func joinsParagraph(comp component) bool {
+	switch comp.(type) {
+	case *code,
+		*bold,
+		*italic,
+		*span,
+		*button,
+		*link:
+		return true
+	}
+	return false
 }
 
 func isBlockElement(comp component) bool {
@@ -189,7 +220,6 @@ func isBlockElement(comp component) bool {
 		*codeBlock,
 		*horizontalRule,
 		*image,
-		// *button, TODO: can this actually be treated as inline element?
 		*nav:
 		return true
 	}
@@ -202,7 +232,8 @@ func (p *parser) parseProperties() ([]property, error, string) {
 	for !p.curTokenIs(rsquirly) {
 		if p.curTokenIs(dot) {
 			if !p.peekTokenIs(word) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. DOT must be followed by a WORD"}, propsString
+				errorMessage := "Property formatted incorrectly. DOT must be followed by a WORD"
+				return nil, &parseError{errorReason: errorMessage}, propsString
 			}
 
 			p.nextToken()
@@ -210,13 +241,15 @@ func (p *parser) parseProperties() ([]property, error, string) {
 			key := p.currentTok.Literal
 
 			if !p.peekTokenIs(equals) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. KEY must be follwed by EQUALS"}, propsString
+				errorMessage := "Property formatted incorrectly. KEY must be follwed by EQUALS"
+				return nil, &parseError{errorReason: errorMessage}, propsString
 			}
 
 			p.nextToken()
 			propsString += p.currentTok.Literal
 			if !p.peekTokenIs(word) {
-				return nil, &parseError{errorReason: "Property formatted incorrectly. EQUALS must be followed by VALUE"}, propsString
+				errorMessage := "Property formatted incorrectly. EQUALS must be followed by VALUE"
+				return nil, &parseError{errorReason: errorMessage}, propsString
 			}
 
 			p.nextToken()
@@ -236,7 +269,7 @@ func (p *parser) parseProperties() ([]property, error, string) {
 	return props, nil, ""
 }
 
-func (p *parser) parseFragment(properties []property, closing tokenType) *fragment {
+func (p *parser) parseFragment(closing tokenType) *fragment {
 	content := p.parseTextLine(closing)
 	return &fragment{Value: content}
 }
@@ -427,7 +460,7 @@ func (p *parser) parseHeader(props []property, closing tokenType) component {
 
 	// next token must be space to be a valid header, otherwise just return a <p>
 	if !p.curTokenIs(space) {
-		return p.parseFragment(props, closing)
+		return p.parseFragment(closing)
 	}
 
 	p.nextToken()
@@ -445,14 +478,14 @@ func (p *parser) parseParagraph(props []property, closing tokenType) component {
 	return &paragraph{Content: contentElements, Properties: props}
 }
 
-func prefixFragment(comp component, prefix string, closing tokenType) {
+func prefixFragment(comp component, prefix string) {
 	switch c := (comp).(type) {
 	case *fragment:
 		c.Value = prefix + c.Value
 	}
 }
 
-func (p *parser) parseCode(properties []property, closing tokenType) component {
+func (p *parser) parseCode(properties []property) component {
 	p.nextToken()
 	var codeString string
 
@@ -466,6 +499,22 @@ func (p *parser) parseCode(properties []property, closing tokenType) component {
 
 	p.nextToken()
 	return &code{Properties: properties, Text: codeString}
+}
+
+func (p *parser) parseCodeDouble(properties []property) component {
+	p.nextToken()
+	p.nextToken()
+
+	var codeText string
+	for !(p.curTokenIs(eof) || (p.curTokenIs(backtick) && p.peekTokenIs(backtick))) {
+		codeText += p.currentTok.Literal
+		p.nextToken()
+	}
+
+	p.nextToken()
+	p.nextToken()
+
+	return &code{Properties: properties, Text: codeText}
 }
 
 func (p *parser) parseStrong(properties []property, closing tokenType) component {
@@ -623,7 +672,7 @@ func (p *parser) parseUnorderedList(properties []property, closing tokenType) co
 	return &unorderedList{Properties: properties, ListItems: listElements}
 }
 
-func (p *parser) parseImage(properties []property, closing tokenType) component {
+func (p *parser) parseImage(properties []property) component {
 	p.nextToken()
 	p.nextToken()
 
@@ -657,7 +706,7 @@ func (p *parser) parseImage(properties []property, closing tokenType) component 
 	return &image{Properties: properties, ImgUrl: urlString, AltText: altText}
 }
 
-func (p *parser) parseDiv(properties []property, closing tokenType) component {
+func (p *parser) parseDiv(properties []property) component {
 	p.nextToken()
 	for p.curTokenIs(newline) {
 		p.nextToken()
@@ -676,7 +725,7 @@ func (p *parser) parseDiv(properties []property, closing tokenType) component {
 	return &div{Properties: properties, Children: components}
 }
 
-func (p *parser) parseLink(properties []property, closing tokenType) component {
+func (p *parser) parseLink(properties []property) component {
 	p.nextToken()
 
 	components, err := p.parse(rbracket)
@@ -724,7 +773,7 @@ func (p *parser) parseLink(properties []property, closing tokenType) component {
 	return &link{Properties: properties, Url: urlString, Content: components}
 }
 
-func (p *parser) parseShortLink(properties []property, closing tokenType) component {
+func (p *parser) parseShortLink(properties []property) component {
 	p.nextToken()
 
 	var urlString string
@@ -740,7 +789,7 @@ func (p *parser) parseShortLink(properties []property, closing tokenType) compon
 	return &link{Properties: properties, Url: urlString, Content: []component{&fragment{Value: urlString}}}
 }
 
-func (p *parser) parseButton(properties []property, closing tokenType) component {
+func (p *parser) parseButton(properties []property) component {
 	p.nextToken()
 	p.nextToken()
 
@@ -777,7 +826,7 @@ func (p *parser) parseButton(properties []property, closing tokenType) component
 	return &button{Properties: properties, OnClick: onClick, Content: components}
 }
 
-func (p *parser) parseNav(properties []property, closing tokenType) component {
+func (p *parser) parseNav(properties []property) component {
 	children := make([]component, 0)
 
 	p.nextToken()
@@ -820,7 +869,7 @@ func (p *parser) parseSpan(properties []property, closing tokenType) component {
 	return &span{Properties: properties, Content: content}
 }
 
-func (p *parser) parseCodeBlock(properties []property, closing tokenType) component {
+func (p *parser) parseCodeBlock(properties []property) component {
 	p.nextToken()
 	p.nextToken()
 

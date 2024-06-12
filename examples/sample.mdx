@@ -16,6 +16,10 @@ The following is an assortment of MDX components.
 
 > Note: Some examples have had styling applied to better showcase the output.
 
+{ .class=alert }
+> MDX is not without is bugs and quirks. It is in active development and everything is still being ironed out.
+If you find any issues, please raise an [issue](https://github.com/mjbozo/mdx/issues).
+
 # Properties
 **Properties** are the reason for MDX's existence. They allow you to enhance the markdown by adding detail which will
 be converted to HTML attributes along with the content.
@@ -69,8 +73,8 @@ This is a normal paragraph.
 ]
 
 # Spans
-**Spans** are created by surrounding elements in `$` symbols. They can be useful for adding some { .class=rainbow }
-$ style $ to in-line text.
+**Spans** are created by surrounding elements in `$` symbols. They can be useful for adding some
+{ .class=rainbow } $ style $ to in-line text.
 
 ###### Example
 ^^
@@ -200,8 +204,7 @@ func main() {
 
 
 # Code
-**Code** components are inline versions of code, which are enclosed by backticks
-{ .style=color:red } $ (need backslash working to display backtick in a code component) $.
+**Code** components are inline versions of code, which are enclosed by a pair of backticks `` ` ``.
 
 ###### Example
 ^^

@@ -40,6 +40,10 @@ button {
   box-shadow: 1px 2px 4px 1px #00000042;
 }
 
+.content > p {
+  margin-bottom: 30px;
+}
+
 a {
   cursor: pointer;
   text-decoration: none;
@@ -70,6 +74,10 @@ blockquote {
   border-left: 0.25em solid #d0d7da;
   padding: 0 1em;
   margin: 12px 0 12px;
+}
+
+.alert {
+  border-left: 0.25em solid #e5725b;
 }
 
 .code-container {

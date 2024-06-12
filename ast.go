@@ -17,13 +17,12 @@ const (
 )
 
 type component interface {
-	// Convert element to HTML representation
+	// Converts component into unformatted HTML
 	Raw() string
+	// Classifies component as either Block or Inline
 	Type() ComponentType
-
-	// Html method rendering html but indented appropriately
-	// Hoping for this to replace the Html method and make everything cleaner
-	Html(int) string
+	// Converts component into formatted HTML
+	Html(indentLevel int) string
 }
 
 type property struct {
@@ -40,7 +39,7 @@ func (f *fragment) String() string {
 }
 
 func (f *fragment) Raw() string {
-	return fmt.Sprintf("%s", f.Value)
+	return f.Value
 }
 
 func (f *fragment) Type() ComponentType {
@@ -85,10 +84,6 @@ func (h *header) InnerHtml() string {
 }
 
 func (h *header) Raw() string {
-	if h.Level == 0 {
-		h.Level = 1
-	}
-
 	var propertyString string
 	for _, property := range h.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
@@ -253,6 +248,10 @@ type code struct {
 	Text       string
 }
 
+func (c *code) String() string {
+	return fmt.Sprintf("Code[%s]", c.Text)
+}
+
 func (c *code) Raw() string {
 	var propertyString string
 	for _, property := range c.Properties {
@@ -271,7 +270,7 @@ func (c *code) Html(indentLevel int) string {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
 
-	formattedOutput := fmt.Sprintf("<code%s>%s</code", propertyString, c.Text)
+	formattedOutput := fmt.Sprintf("<code%s>%s</code>", propertyString, c.Text)
 
 	return formattedOutput
 }
@@ -999,6 +998,14 @@ type span struct {
 	Content    []component
 }
 
+func (s *span) String() string {
+	var contentString string
+	for _, child := range s.Content {
+		contentString += fmt.Sprintf("%s ", child)
+	}
+	return fmt.Sprintf("Span{Content=[%s]}", strings.TrimSpace(contentString))
+}
+
 func (s *span) InnerHtml() string {
 	var contentString string
 	for _, child := range s.Content {
@@ -1187,9 +1194,8 @@ func appendInlineString(inlineString string, indentPrefix string, lineLength int
 		for len(words) > 0 {
 			canAdd := MAX_LENGTH - len(currentLine) - len(indentString)
 
-			// this is not what I originally intended, but I think it might look better like this?
-			// to make it as originally intended, remove `currentLine` from below length check
-			if len(currentLine+words[0]) > canAdd {
+			// not sure if I prefer the look of len(currentLine+words[0]) or just len(words[0]) here
+			if len(words[0]) > canAdd {
 				*formattedOutput += indentString + currentLine + "\n"
 				currentLine = ""
 			}

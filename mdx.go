@@ -13,17 +13,17 @@ func (e *invalidFileError) Error() string {
 	return "Invalid file type. File must have .md or .mdx extension"
 }
 
-// TODO: Format HTML correctly when generating file
 // TODO: Parsing backslash
 // TODO: Review where fragment can be replaced with paragraph => more friendly for styling
-// TODO: Consolidation / cleanup step after AST first built - starting line with inline component does not join to following paragraph
 // TODO: Ordered list elements only render <p> and only parse continuous lists (doesn't continue over empty lines)
 // TODO: Unordered lists should ignore all whitespace between list components
 // TODO: Unordered list can't be immediately followed by horizontal rule
-// TODO: Div doesn't return fragment when no closing bracket exists
-// TODO: Code block formatting (shouldn't this just be up to the user?)
-// TODO: Parse code with double backticks
-// TODO: Button inside p is bit weird
+// TODO: Div doesn't return fragment when no closing bracket exists =-> this just means divs are self closing at eof (aka feature not a bug?)
+// TODO: Fix paragraph with inline element starting on next line - currently treats as new paragraph
+// TODO: Code block syntax highlighting (need to know language for this)
+
+// IDEA: Consider creating a parser context struct to keep track of what the heck is going on. This could make it
+// easier to handle obscure scenarios
 
 // Transform .mdx or .md file into HTML string.
 // On successful transformation, returns string representing HTML and nil error.

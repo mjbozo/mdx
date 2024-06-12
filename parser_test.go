@@ -329,19 +329,23 @@ func TestParseCode(t *testing.T) {
 }
 
 func TestParseCodeBetweenElements(t *testing.T) {
-	input := "# Header\n"
-	input += "`hello, world` "
-	input += "goodbye, code"
+	input := "# Header\n`hello, world` goodbye, code"
 	elements := execute(t, input)
-	validateLength(t, len(elements), 3)
+	validateLength(t, len(elements), 2)
 	element := elements[1]
 
-	if code, ok := element.(*code); ok {
-		if code.Text != "hello, world" {
-			fail(t, fmt.Sprintf("Expected 'hello, world', got=%s", code.Text))
+	if p, ok := element.(*paragraph); ok {
+		validateLength(t, len(p.Content), 2)
+
+		if code, ok := p.Content[0].(*code); ok {
+			if code.Text != "hello, world" {
+				fail(t, fmt.Sprintf("Expected 'hello, world', got=%s", code.Text))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected Code element, got=%T", element))
 		}
 	} else {
-		fail(t, fmt.Sprintf("Expected Code element, got=%T", element))
+		fail(t, fmt.Sprintf("Expected Paragraph element, got=%T", element))
 	}
 }
 
@@ -916,7 +920,7 @@ func TestParseLinkBetweenElements(t *testing.T) {
 > Quote
 `
 	elements = execute(t, input)
-	validateLength(t, len(elements), 4) // this is 4 because line break after link
+	validateLength(t, len(elements), 3)
 	element = elements[1]
 
 	if link, ok := element.(*link); ok {
@@ -1290,12 +1294,11 @@ func main() {
 
 func TestParser(t *testing.T) {
 	inputs := map[string][]component{
-		"test\ntest": []component{
+		"test\ntest": {
 			&paragraph{Content: []component{&fragment{Value: "test test"}}},
 		},
-		"test\n\ntest": []component{
+		"test\n\ntest": {
 			&paragraph{Content: []component{&fragment{Value: "test"}}},
-			&lineBreak{},
 			&paragraph{Content: []component{&fragment{Value: "test"}}},
 		},
 	}
@@ -1303,7 +1306,7 @@ func TestParser(t *testing.T) {
 	for test, expected := range inputs {
 		actual := execute(t, test)
 		if !reflect.DeepEqual(actual, expected) {
-			fail(t, fmt.Sprintf("Expected %q, got=%q", actual, expected))
+			fail(t, fmt.Sprintf("Expected %q, got=%q", expected, actual))
 		}
 	}
 }
