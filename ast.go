@@ -270,7 +270,7 @@ func (c *code) Html(indentLevel int) string {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
 
-	formattedOutput := fmt.Sprintf("<code%s>%s</code>", propertyString, c.Text)
+	formattedOutput := fmt.Sprintf("<code%s>%s</code>\n", propertyString, c.Text)
 
 	return formattedOutput
 }
