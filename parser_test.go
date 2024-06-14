@@ -319,12 +319,17 @@ func TestParseCode(t *testing.T) {
 	validateLength(t, len(elements), 1)
 
 	element = elements[0]
-	if frag, ok := element.(*fragment); ok {
-		if frag.Value != input {
-			fail(t, fmt.Sprintf("Got fragment with string %s", frag.Value))
+	if p, ok := element.(*paragraph); ok {
+		validateLength(t, len(p.Content), 1)
+		if frag, ok := p.Content[0].(*fragment); ok {
+			if frag.Value != input {
+				fail(t, fmt.Sprintf("Got fragment with string %s", frag.Value))
+			}
+		} else {
+			fail(t, fmt.Sprintf("Expected Fragment, got=%T", element))
 		}
 	} else {
-		fail(t, fmt.Sprintf("Expected Fragment, got=%T", element))
+		fail(t, fmt.Sprintf("Expected paragraph, got=%T", element))
 	}
 }
 

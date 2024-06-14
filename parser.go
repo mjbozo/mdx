@@ -491,7 +491,7 @@ func (p *parser) parseCode(properties []property) component {
 
 	for !p.curTokenIs(backtick) {
 		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "`" + codeString}
+			return &paragraph{Properties: properties, Content: []component{&fragment{Value: "`" + codeString}}}
 		}
 		codeString += p.currentTok.Literal
 		p.nextToken()
@@ -521,7 +521,7 @@ func (p *parser) parseStrong(properties []property, closing tokenType) component
 	p.nextToken()
 	if p.peekTokenIs(space) || p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
-		return &fragment{Value: "*" + content}
+		return &paragraph{Properties: properties, Content: []component{&fragment{Value: "*" + content}}}
 	}
 
 	p.nextToken()
@@ -538,7 +538,7 @@ func (p *parser) parseEm(properties []property, closing tokenType) component {
 	if p.peekTokenIs(space) || p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
 		p.nextToken()
-		return &fragment{Value: content}
+		return &paragraph{Properties: properties, Content: []component{&fragment{Value: content}}}
 	}
 
 	p.nextToken()
@@ -682,12 +682,12 @@ func (p *parser) parseImage(properties []property) component {
 		p.nextToken()
 
 		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "![" + altText}
+			return &paragraph{Properties: properties, Content: []component{&fragment{Value: "![" + altText}}}
 		}
 	}
 
 	if !p.peekTokenIs(lparen) {
-		return &fragment{Value: "![" + altText + "]"}
+		return &paragraph{Properties: properties, Content: []component{&fragment{Value: "![" + altText + "]"}}}
 	}
 
 	p.nextToken()
@@ -699,7 +699,8 @@ func (p *parser) parseImage(properties []property) component {
 		p.nextToken()
 
 		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "![" + altText + "](" + urlString}
+			fragment := &fragment{Value: "![" + altText + "](" + urlString}
+			return &paragraph{Properties: properties, Content: []component{fragment}}
 		}
 	}
 
@@ -782,7 +783,7 @@ func (p *parser) parseShortLink(properties []property) component {
 		p.nextToken()
 
 		if p.curTokenIs(newline) || p.curTokenIs(eof) {
-			return &fragment{Value: "<" + urlString}
+			return &paragraph{Properties: properties, Content: []component{&fragment{Value: "<" + urlString}}}
 		}
 	}
 
@@ -849,7 +850,7 @@ func (p *parser) parseSpan(properties []property, closing tokenType) component {
 	if p.peekTokenIs(newline) || p.peekTokenIs(eof) {
 		content := p.parseTextLine(closing)
 		p.nextToken()
-		return &fragment{Value: content}
+		return &paragraph{Properties: properties, Content: []component{&fragment{Value: content}}}
 	}
 
 	p.nextToken()
@@ -880,7 +881,8 @@ func (p *parser) parseCodeBlock(properties []property) component {
 
 		if p.curTokenIs(eof) {
 			fragment := &fragment{Value: "^^" + codeBlockString}
-			return fragment
+			paragraph := &paragraph{Properties: properties, Content: []component{fragment}}
+			return paragraph
 		}
 	}
 	p.nextToken()
