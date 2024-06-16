@@ -4,7 +4,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="description" content="" />
         <title>MDX Sample</title>
-        <link rel="stylesheet" href="sample.css" >
+        <link href="sample.css" rel="stylesheet" >
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins" >
         <link href="https://fonts.googleapis.com/css2?family=Fira+Code" rel="stylesheet" >
     </head>
@@ -18,38 +18,29 @@
         <div class="content">
             <h1>Welcome</h1>
             <p>
-                Welcome to the MDX Samples Page. This page will serve
-                as both a starting point for referencing the extra
-                syntax that comes with MDX, as well as reference point
-                to see how components are behaving as development of
-                the standard continues.
+                Welcome to the MDX Samples Page. This page will serve as both a starting point for referencing the extra
+                syntax that comes with MDX, as well as reference point to see how components are behaving as development
+                of the standard continues.
             </p>
             <p>
-                This entire page is written using MDX, and the source
-                code can be found <a href="https://github.com/mjbozo/mdx/tree/main/examples"
-                target=_blank>here</a>.
+                This entire page is written using MDX, and the source code can be found <a
+                href="https://github.com/mjbozo/mdx/tree/main/examples" target=_blank>here</a>.
             </p>
             <p>The following is an assortment of MDX components.</p>
             <blockquote>Note: Some examples have had styling applied to better showcase the output.</blockquote>
             <blockquote class="alert">
-                MDX is not without is bugs and quirks. It is in active
-                development and everything is still being ironed out.
-                If you find any issues, please raise an <a
-                href="https://github.com/mjbozo/mdx/issues"
+                MDX is not without is bugs and quirks. It is in active development and everything is still being ironed
+                out. If you find any issues, please raise an <a href="https://github.com/mjbozo/mdx/issues"
                 target=_blank>issue</a>.
             </blockquote>
             <h1>Properties</h1>
             <p>
-                <strong>Properties</strong> are the reason for MDX's
-                existence. They allow you to enhance the markdown by
-                adding detail which will be converted to HTML attributes
-                along with the content.
+                <strong>Properties</strong> are the reason for MDX's existence. They allow you to enhance the markdown by
+                adding detail which will be converted to HTML attributes along with the content.
             </p>
             <p>
-                MDX properties are contained in squirly braces
-                <code>{}</code> and are parsed as key-value pairs, and
-                are directly inserted in the resulting HTML of the
-                following component.
+                MDX properties are contained in squirly braces <code>{}</code> and are parsed as key-value pairs, and are
+                directly inserted in the resulting HTML of the following component.
             </p>
             <p>Multiple properties can be added by simply space separating them.</p>
             <h6>Example</h6>
@@ -60,17 +51,14 @@
             <div class="example-output">
                 <p class="example-tag">Produces</p>
                 <p class="container" data-index="0">
-                    This component will be have it's HTML generated with
-                    a class of 'container' and data attribute 'index' =
-                    0.
+                    This component will be have it's HTML generated with a class of 'container' and data attribute
+                    'index' = 0.
                 </p>
             </div>
             <h1>Headings</h1>
             <p>
-                <strong>Headings</strong> are parsed by starting a line
-                with <code>#</code>. Up to 6 <code>#</code>s can be
-                specified to create tags <code>h1</code> through
-                <code>h6</code>.
+                <strong>Headings</strong> are parsed by starting a line with <code>#</code>. Up to 6 <code>#</code>s can
+                be specified to create tags <code>h1</code> through <code>h6</code>.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -82,8 +70,7 @@
             </div>
             <h1>Paragraphs</h1>
             <p>
-                <strong>Paragraphs</strong> are created by starting a
-                new line with normal text. They are the default tag
+                <strong>Paragraphs</strong> are created by starting a new line with normal text. They are the default tag
                 for blocks of text.
             </p>
             <h6>Example</h6>
@@ -96,10 +83,8 @@
             </div>
             <h1>Spans</h1>
             <p>
-                <strong>Spans</strong> are created by surrounding
-                elements in <code>$</code> symbols. They can be useful
-                for adding some <span class="rainbow">style</span> to
-                in-line text.
+                <strong>Spans</strong> are created by surrounding elements in <code>$</code> symbols. They can be useful
+                for adding some <span class="rainbow">style</span> to in-line text.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -113,8 +98,7 @@
             </div>
             <h1>Divs</h1>
             <p>
-                <strong>Divs</strong> can be created by surrounding
-                content in square brackets <code>[]</code> and are
+                <strong>Divs</strong> can be created by surrounding content in square brackets <code>[]</code> and are
                 useful for giving structure to the page.
             </p>
             <h6>Example</h6>
@@ -141,11 +125,9 @@
             </div>
             <h1>Buttons</h1>
             <p>
-                <strong>Buttons</strong> are denoted by the syntax
-                <code>~[Content](callbackFunction)</code>. Button
-                Content can consist of simple text or a series of child
-                components. The callback function is simply the name
-                of the function to be called on button click.
+                <strong>Buttons</strong> are denoted by the syntax <code>~[Content](callbackFunction)</code>. Button
+                Content can consist of simple text or a series of child components. The callback function is simply the
+                name of the function to be called on button click.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -160,11 +142,9 @@
             </div>
             <h1>Links</h1>
             <p>
-                <strong>Links</strong> can be added in two different
-                ways. A link can be added to appear 'as-is' by enclosing
-                it in angle brackets <code><></code>. For more control
-                over formatting, the second notation can be used:
-                <code>[Content](url)</code>.
+                <strong>Links</strong> can be added in two different ways. A link can be added to appear 'as-is' by
+                enclosing it in angle brackets <code><></code>. For more control over formatting, the second notation can
+                be used: <code>[Content](url)</code>.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -188,11 +168,9 @@
             </div>
             <h1>Code Blocks</h1>
             <p>
-                <strong>Code Blocks</strong> are areas you can write
-                multiline pieces of code which will retain formatting.
-                The content is written between pairs of double carets
-                <code>^^</code>. All the examples on this page are done
-                using Code Block components.
+                <strong>Code Blocks</strong> are areas you can write multiline pieces of code which will retain
+                formatting. The content is written between pairs of double carets <code>^^</code>. All the examples on
+                this page are done using Code Block components.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -220,8 +198,7 @@
             </div>
             <h1>Code</h1>
             <p>
-                <strong>Code</strong> components are inline versions
-                of code, which are enclosed by a pair of backticks
+                <strong>Code</strong> components are inline versions of code, which are enclosed by a pair of backticks
                 <code> ` </code>.
             </p>
             <h6>Example</h6>
@@ -234,8 +211,7 @@
             </div>
             <h1>Lists</h1>
             <p>
-                <strong>Lists</strong> can be rendered as both ordered
-                and unordered lists by prefixing the list elements
+                <strong>Lists</strong> can be rendered as both ordered and unordered lists by prefixing the list elements
                 numerically or wish dashes.
             </p>
             <h6>Example</h6>
@@ -269,10 +245,8 @@
             </div>
             <h1>Strong (bold)</h1>
             <p>
-                <strong>Strong</strong> components are inline text
-                components that give text a bold look. They are written
-                in MDX by surrounding the text in double asterisks
-                <code>**</code>.
+                <strong>Strong</strong> components are inline text components that give text a bold look. They are
+                written in MDX by surrounding the text in double asterisks <code>**</code>.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -284,10 +258,8 @@
             </div>
             <h1>Em (italic)</h1>
             <p>
-                <strong>Em</strong> components are also inline text
-                components, but italicise the text instead. They are
-                written by enclosing text in single asterisks
-                <code>*</code>.
+                <strong>Em</strong> components are also inline text components, but italicise the text instead. They are
+                written by enclosing text in single asterisks <code>*</code>.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -299,8 +271,7 @@
             </div>
             <h1>Block Quotes</h1>
             <p>
-                <strong>Block Quotes</strong> can also be added by
-                prefixing text with a greater than angle bracket
+                <strong>Block Quotes</strong> can also be added by prefixing text with a greater than angle bracket
                 <code>></code>. They can also be nested.
             </p>
             <h6>Example</h6>
@@ -326,8 +297,8 @@
             </div>
             <h1>Nav</h1>
             <p>
-                <strong>Nav</strong> elements can be added by enclosing
-                other components in a pair of <code>@</code> characters.
+                <strong>Nav</strong> elements can be added by enclosing other components in a pair of <code>@</code>
+                characters.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -353,9 +324,8 @@
             </div>
             <h1>Horizontal Rules</h1>
             <p>
-                <strong>Horizontal Rules</strong> are added by inserting
-                3 dashes <code>-</code> or underscores <code>_</code>
-                in a row.
+                <strong>Horizontal Rules</strong> are added by inserting 3 dashes <code>-</code> or underscores
+                <code>_</code> in a row.
             </p>
             <h6>Example</h6>
             <div class="code-block">
@@ -370,10 +340,8 @@
             </div>
             <h1>Comments</h1>
             <p>
-                <strong>Comments</strong> are also supported in MDX,
-                simply by prefixing the line with 2 backslashes
-                <code>//</code>. Comments do not get rendered to the
-                HTML output.
+                <strong>Comments</strong> are also supported in MDX, simply by prefixing the line with 2 backslashes
+                <code>//</code>. Comments do not get rendered to the HTML output.
             </p>
             <h6>Example</h6>
             <div class="code-block">

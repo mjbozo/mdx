@@ -55,8 +55,8 @@ func (p *parser) isAfterNewline(tokType tokenType) bool {
 	return p.curTokenIs(newline) && p.peekTokenIs(tokType)
 }
 
-func (p *parser) isNextLineElement() bool {
-	return p.curTokenIs(newline) && p.peekToken().IsElementToken()
+func (p *parser) isNextLineBlockElement() bool {
+	return p.curTokenIs(newline) && p.peekToken().IsElementToken() && p.peekToken().IsBlockElement()
 }
 
 func (p *parser) parse(delim tokenType) ([]component, error) {
@@ -73,7 +73,7 @@ func (p *parser) parse(delim tokenType) ([]component, error) {
 			}
 			continue
 		} else {
-			component = p.parseComponent(properties, delim)
+			component = p.parseComponent(properties, delim, false)
 		}
 
 		if component != nil {
@@ -91,7 +91,7 @@ func (p *parser) parse(delim tokenType) ([]component, error) {
 	return elements, nil
 }
 
-func (p *parser) parseComponent(properties []property, closing tokenType) component {
+func (p *parser) parseComponent(properties []property, closing tokenType, joinPrevious bool) component {
 	previousToken := p.previousToken
 
 	var element component
@@ -195,13 +195,15 @@ func (p *parser) parseComponent(properties []property, closing tokenType) compon
 		}
 	}
 
-	// if line starts with an inline element and is followed by a paragraph, wrap the first inline element
-	// in following paragraph
-	if joinsParagraph(element) && !p.curTokenIs(newline) && p.peekTokenIs(word) && previousToken.Type == newline {
-		pComponent := p.parseParagraph(nil, closing).(*paragraph)
-		paragraphChildren := append([]component{element}, pComponent.Content...)
-		pComponent.Content = paragraphChildren
-		element = pComponent
+	if !joinPrevious {
+		// if line starts with an inline element and is followed by a paragraph, wrap the first inline element
+		// in following paragraph
+		if joinsParagraph(element) && !p.curTokenIs(newline) && p.peekTokenIs(word) && previousToken.Type == newline {
+			pComponent := p.parseParagraph(nil, closing).(*paragraph)
+			paragraphChildren := append([]component{element}, pComponent.Content...)
+			pComponent.Content = paragraphChildren
+			element = pComponent
+		}
 	}
 
 	return element
@@ -305,7 +307,7 @@ func (p *parser) parseLine(closing tokenType) []component {
 	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
 		if p.currentTok.IsElementToken() {
 			bankCurrentFragment(&lineElements, &lineString)
-			lineElements = append(lineElements, p.parseComponent(nil, closing))
+			lineElements = append(lineElements, p.parseComponent(nil, closing, false))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
 			if parseErr != nil {
@@ -316,7 +318,7 @@ func (p *parser) parseLine(closing tokenType) []component {
 					p.nextToken()
 				}
 				bankCurrentFragment(&lineElements, &lineString)
-				nextComponent := p.parseComponent(properties, closing)
+				nextComponent := p.parseComponent(properties, closing, false)
 				if nextComponent != nil {
 					lineElements = append(lineElements, nextComponent)
 				}
@@ -340,7 +342,7 @@ func (p *parser) parseBlockQuoteLine(closing tokenType) []component {
 	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
 		if p.currentTok.IsElementToken() {
 			bankCurrentFragment(&lineElements, &lineString)
-			lineElements = append(lineElements, p.parseComponent(nil, closing))
+			lineElements = append(lineElements, p.parseComponent(nil, closing, false))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
 			if parseErr != nil {
@@ -351,7 +353,7 @@ func (p *parser) parseBlockQuoteLine(closing tokenType) []component {
 					p.nextToken()
 				}
 				bankCurrentFragment(&lineElements, &lineString)
-				nextComponent := p.parseComponent(properties, closing)
+				nextComponent := p.parseComponent(properties, closing, false)
 				if nextComponent != nil {
 					lineElements = append(lineElements, nextComponent)
 				}
@@ -382,7 +384,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 	for !(p.curTokenIs(newline) || (p.curTokenIs(closing) && p.peekTokenIs(closing))) {
 		if p.currentTok.IsElementToken() {
 			bankCurrentFragment(&lineElements, &lineString)
-			lineElements = append(lineElements, p.parseComponent(nil, closing))
+			lineElements = append(lineElements, p.parseComponent(nil, closing, false))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
 			if parseErr != nil {
@@ -393,7 +395,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 					p.nextToken()
 				}
 				bankCurrentFragment(&lineElements, &lineString)
-				nextComponent := p.parseComponent(properties, closing)
+				nextComponent := p.parseComponent(properties, closing, false)
 				if nextComponent != nil {
 					lineElements = append(lineElements, nextComponent)
 				}
@@ -419,10 +421,10 @@ func (p *parser) parseBlock(closing tokenType) []component {
 	blockElements := make([]component, 0)
 	var blockString string
 
-	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineElement()) {
+	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineBlockElement()) {
 		if p.currentTok.IsElementToken() {
 			bankCurrentFragment(&blockElements, &blockString)
-			blockElements = append(blockElements, p.parseComponent(nil, closing))
+			blockElements = append(blockElements, p.parseComponent(nil, closing, true))
 		} else if p.curTokenIs(lsquirly) {
 			properties, parseErr, propsText := p.parseProperties()
 			if parseErr != nil {
@@ -433,7 +435,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 					p.nextToken()
 				}
 				bankCurrentFragment(&blockElements, &blockString)
-				nextComponent := p.parseComponent(properties, closing)
+				nextComponent := p.parseComponent(properties, closing, true)
 				if nextComponent != nil {
 					blockElements = append(blockElements, nextComponent)
 				}

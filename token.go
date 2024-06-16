@@ -72,3 +72,19 @@ func (t *token) IsElementToken() bool {
 
 	return false
 }
+
+func (t *token) IsBlockElement() bool {
+	switch t.Type {
+	case hash,
+		bang,
+		gt,
+		dash,
+		listelement,
+		lbracket,
+		caret,
+		at:
+		return true
+	}
+
+	return false
+}
