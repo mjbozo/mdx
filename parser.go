@@ -121,13 +121,19 @@ func (p *parser) parseComponent(properties []property, closing tokenType) compon
 		if p.peekTokenIs(space) {
 			element = p.parseUnorderedList(properties, closing)
 		} else if p.peekTokenIs(dash) {
-			p.nextToken()
-			if p.peekTokenIs(dash) {
+			if previousToken.Type == dash {
 				element = &horizontalRule{Properties: properties}
 				p.nextToken()
+				p.nextToken()
 			} else {
-				element = p.parseFragment(closing)
-				prefixFragment(element, "-")
+				p.nextToken()
+				if p.peekTokenIs(dash) {
+					element = &horizontalRule{Properties: properties}
+					p.nextToken()
+				} else {
+					element = p.parseFragment(closing)
+					prefixFragment(element, "-")
+				}
 			}
 		} else {
 			element = p.parseFragment(closing)
