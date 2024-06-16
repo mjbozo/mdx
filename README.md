@@ -17,7 +17,9 @@ If you wish to use MDX as a command line tool for generating HTML files.
 ## Usage
 ### Import
 Add MDX to your Go project by running
-`go get https://github.com/mjbozo/mdx`
+```
+go get https://github.com/mjbozo/mdx
+```
 
 ### Generation
 After importing MDX into your Go project, you can generate HTML files by calling the `Generate()` method, and passing
@@ -44,7 +46,7 @@ To add more customisability to markdown, MDX features properties. By prefixing e
 wrapped in `{ }`, the subsequent parsed elements will receive these properties when parsed into HTML.
 
 Example:
-```md
+```mdx
 { .class=section-heading }
 # Welcome
 ```
@@ -54,7 +56,7 @@ To add more structure, divs can be parsed into the HTML by wrapping content in `
 allows for much more control over the styling and structure of the resulting HTML.
 
 Example:
-```md
+```mdx
 [
   # Welcome
   Hello there
@@ -66,7 +68,7 @@ For inline structure, spans can be parsed by wrapping content in `$ $`. Combinin
 powerful way of managing inline styling.
 
 Example:
-```md
+```mdx
 Hello, $ world $!
 ```
 
@@ -76,7 +78,7 @@ the name of the click handler function defined in the HTML script tag. Still fig
 script tags.
 
 Example:
-```md
+```mdx
 ~[Click Me](handleClick)
 ```
 
@@ -86,7 +88,7 @@ To generate the custom code block, wrap the code in `^^ ^^`. Syntax highlighting
 in the future.
 
 Example:
-```md
+```mdx
 ^^
 func main() {
   fmt.Println("Hello, world!")
@@ -99,7 +101,7 @@ While not entirely useful since we already have divs and custom properties, Nav 
 generate a Nav element by wrapping the content in `@ @`.
 
 Example:
-```md
+```mdx
 @
 [Home](/home)
 [Feed](/feed)
@@ -112,7 +114,7 @@ Yes, markdown already supports comments, but I prefer commenting a line by prefi
 done here.
 
 Example:
-```md
+```mdx
 // do you really need an example for this one?
 ```
 
