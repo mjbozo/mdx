@@ -7,13 +7,36 @@ a variety of elements. The main focus of MDX is for converting content into HTML
 
 It's still pretty (very) rough around the edges. See the files `sample.mdx` and `sample.html` for some examples.
 
-MDX can be used as a command line tool, or as an imported package.
+If you wish to use MDX as a command line tool for generating HTML files.
 
 
 ### Quick Links
-[Extensions](#Extensions)
 [Usage](#Usage)
+[Extensions](#Extensions)
 
+## Usage
+### Import
+Add MDX to your Go project by running
+`go get https://github.com/mjbozo/mdx`
+
+### Generation
+After importing MDX into your Go project, you can generate HTML files by calling the `Generate()` method, and passing
+it an appropriate `config` object. The config option must have `InputFilename` data, and can optionally have other data
+such as:
+- Title
+- InputFilename
+- OutputFilename
+- Links
+
+See the [sample example](https://github.com/mjbozo/mdx/tree/main/examples/sample) to see how MDX-HTML generation can
+be used.
+
+### Transformation
+You can also use MDX in conjuction with Go's templating system to insert formatted HTML into targetted areas of a
+template file. Calling the `Transform()` method will return the HTML string that was transformed from the MDX.
+
+See the [template example](https://github.com/mjbozo/mdx/tree/main/examples/template) to see how MDX-HTML transformation
+can be used.
 
 ## Extensions
 ### Properties
@@ -44,7 +67,7 @@ powerful way of managing inline styling.
 
 Example:
 ```md
-Hello, $world$!
+Hello, $ world $!
 ```
 
 ### Buttons
@@ -93,16 +116,6 @@ Example:
 // do you really need an example for this one?
 ```
 
-
-## Usage
-### Import
-After importing MDX into your Go project, you can generate HTML files by calling the `Generate` method, and passing it
-an appropriate `config` object. The config option must have `Filename` data, and can optionally have other data such as:
-- Title
-- OutputFilename
-- CssFilename
-- Favicon
-- FontLink
 
 ### Command Line
 TODO :P

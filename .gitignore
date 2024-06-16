@@ -1,2 +1,2 @@
-examples/go.mod
+examples/**/go.mod
 playground/
