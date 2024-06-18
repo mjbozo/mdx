@@ -1,5 +1,7 @@
 ![CI Status](https://github.com/matt-bourke/mdx/actions/workflows/go.yml/badge.svg)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B7XS3QP)
+
 # MDX
 MDX is a custom prototype markdown extension format where custom data can be added to regular markdown tags.
 It aims to give a little extra control over the structure and function of markdown files by allowing you to add 
