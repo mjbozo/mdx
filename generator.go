@@ -16,7 +16,7 @@ type GeneratorConfig struct {
 
 func transformMDX(elements []component) string {
 	content := &div{Children: elements}
-	htmlString := content.Html(1)
+	htmlString := strings.ReplaceAll(content.Html(1), "\n\n", "\n")
 	return htmlString
 }
 

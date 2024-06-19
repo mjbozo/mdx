@@ -422,7 +422,7 @@ func (p *parser) parseBlock(closing tokenType) []component {
 	var blockString string
 
 	for !(p.curTokenIs(eof) || p.curTokenIs(closing) || p.isDoubleBreak() || p.isAfterNewline(closing) || p.isNextLineBlockElement()) {
-		if p.currentTok.IsElementToken() {
+		if p.currentTok.IsInlineElement() {
 			bankCurrentFragment(&blockElements, &blockString)
 			blockElements = append(blockElements, p.parseComponent(nil, closing, true))
 		} else if p.curTokenIs(lsquirly) {
@@ -447,9 +447,10 @@ func (p *parser) parseBlock(closing tokenType) []component {
 			p.nextToken()
 		}
 
-		if p.curTokenIs(newline) && p.peekTokenIs(tab) {
+		if p.curTokenIs(newline) && (p.peekTokenIs(tab) || p.peekTokenIs(space)) {
+			blockString += " "
 			p.nextToken()
-			for p.curTokenIs(tab) {
+			for p.curTokenIs(tab) || p.curTokenIs(space) {
 				p.nextToken()
 			}
 		}

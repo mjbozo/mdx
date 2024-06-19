@@ -4,9 +4,9 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="description" content="" />
         <title>MDX Sample</title>
-        <link href="sample.css" rel="stylesheet" >
+        <link rel="stylesheet" href="sample.css" >
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins" >
-        <link href="https://fonts.googleapis.com/css2?family=Fira+Code" rel="stylesheet" >
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code" >
     </head>
 
     <body>
@@ -153,8 +153,12 @@
             </div>
             <div class="example-output">
                 <p class="example-tag">Produces</p>
-                <a href="https://ko-fi.com/mjbozo" target=_blank>https://ko-fi.com/mjbozo</a>
-                <a href="https://ko-fi.com/mjbozo" target=_blank>Buy me a coffee (please)</a>
+                <div>
+                    <a href="https://ko-fi.com/mjbozo" target=_blank>https://ko-fi.com/mjbozo</a>
+                </div>
+                <div>
+                    <a href="https://ko-fi.com/mjbozo" target=_blank>Buy me a coffee (please)</a>
+                </div>
             </div>
             <h1>Images</h1>
             <p><strong>Images</strong> can be inserted with the syntax <code>![Alt Text](imageUrl)</code>.</p>
@@ -212,7 +216,7 @@
             <h1>Lists</h1>
             <p>
                 <strong>Lists</strong> can be rendered as both ordered and unordered lists by prefixing the list elements
-                numerically or wish dashes.
+                numerically or with dashes.
             </p>
             <h6>Example</h6>
             <div class="code-block">

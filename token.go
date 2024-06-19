@@ -88,3 +88,16 @@ func (t *token) IsBlockElement() bool {
 
 	return false
 }
+
+func (t *token) IsInlineElement() bool {
+	switch t.Type {
+	case asterisk,
+		backtick,
+		lbracket,
+		tidle,
+		dollar:
+		return true
+	}
+
+	return false
+}
