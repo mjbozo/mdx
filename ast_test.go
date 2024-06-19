@@ -230,14 +230,14 @@ func TestAstLinkHtml(t *testing.T) {
 func TestAstButtonHtml(t *testing.T) {
 	button := button{OnClick: "handleClick", Content: []component{&paragraph{Content: []component{&fragment{Value: "Click Me"}}}}}
 	buttonHtml := button.Raw()
-	expected := "<button onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
+	expected := "<button onclick=\"handleClick(this)\">\n    <p>Click Me</p>\n</button>"
 	if buttonHtml != expected {
 		t.Errorf("Button wrong, got=%q", buttonHtml)
 	}
 
 	button.Properties = defaultProps(t)
 	buttonHtml = button.Raw()
-	expected = "<button class=\"test\" style=\"background-color: red\" onclick=\"handleClick()\">\n    <p>Click Me</p>\n</button>"
+	expected = "<button class=\"test\" style=\"background-color: red\" onclick=\"handleClick(this)\">\n    <p>Click Me</p>\n</button>"
 	if buttonHtml != expected {
 		t.Errorf("Button properties wrong, got=%q", buttonHtml)
 	}
