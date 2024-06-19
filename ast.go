@@ -817,7 +817,7 @@ func (b *button) Raw() string {
 	for _, property := range b.Properties {
 		propertyString += fmt.Sprintf(" %s=\"%s\"", property.Name, property.Value)
 	}
-	return fmt.Sprintf("<button%s onclick=\"%s()\">\n    %s\n</button>", propertyString, b.OnClick, b.InnerHtml())
+	return fmt.Sprintf("<button%s onclick=\"%s(this)\">\n    %s\n</button>", propertyString, b.OnClick, b.InnerHtml())
 }
 
 func (b *button) Type() ComponentType {
@@ -836,7 +836,7 @@ func (b *button) Html(indentLevel int) string {
 		indentPrefix += INDENT
 	}
 
-	openingTag := fmt.Sprintf("<button%s onclick=\"%s()\">", propertyString, b.OnClick)
+	openingTag := fmt.Sprintf("<button%s onclick=\"%s(this)\">", propertyString, b.OnClick)
 	closingTag := "</button>"
 
 	formattedOutput += indentPrefix + openingTag
