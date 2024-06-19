@@ -506,6 +506,10 @@ func (p *parser) parseCode(properties []property) component {
 		p.nextToken()
 	}
 
+	// handle edge case where html tags are enclosed in code element
+	// using encoding for left angle bracket prevents contents being parsed as actual html
+	codeString = strings.ReplaceAll(codeString, "<", "&lt;")
+
 	p.nextToken()
 	return &code{Properties: properties, Text: codeString}
 }
