@@ -99,7 +99,8 @@ func (p *parser) parseComponent(properties []property, closing tokenType, joinPr
 	switch p.currentTok.Type {
 	case hash:
 		element = p.parseHeader(properties, closing)
-	case word:
+	case word,
+		backslash:
 		element = p.parseParagraph(properties, closing)
 	case backtick:
 		if p.peekTokenIs(backtick) {
@@ -305,7 +306,7 @@ func (p *parser) parseLine(closing tokenType) []component {
 	var lineString string
 
 	for !(p.curTokenIs(newline) || p.curTokenIs(closing)) {
-		if p.currentTok.IsElementToken() {
+		if p.currentTok.IsInlineElement() {
 			bankCurrentFragment(&lineElements, &lineString)
 			lineElements = append(lineElements, p.parseComponent(nil, closing, false))
 		} else if p.curTokenIs(lsquirly) {
@@ -324,6 +325,10 @@ func (p *parser) parseLine(closing tokenType) []component {
 				}
 			}
 		} else {
+			if p.curTokenIs(backslash) {
+				p.nextToken()
+			}
+
 			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
 				lineString += p.currentTok.Literal
 			}
@@ -359,6 +364,10 @@ func (p *parser) parseBlockQuoteLine(closing tokenType) []component {
 				}
 			}
 		} else {
+			if p.curTokenIs(backslash) {
+				p.nextToken()
+			}
+
 			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
 				lineString += p.currentTok.Literal
 			}
@@ -382,7 +391,7 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 	var lineString string
 
 	for !(p.curTokenIs(newline) || (p.curTokenIs(closing) && p.peekTokenIs(closing))) {
-		if p.currentTok.IsElementToken() {
+		if p.currentTok.IsInlineElement() {
 			bankCurrentFragment(&lineElements, &lineString)
 			lineElements = append(lineElements, p.parseComponent(nil, closing, false))
 		} else if p.curTokenIs(lsquirly) {
@@ -401,6 +410,10 @@ func (p *parser) parseLineDoubleClose(closing tokenType) []component {
 				}
 			}
 		} else {
+			if p.curTokenIs(backslash) {
+				p.nextToken()
+			}
+
 			lineString += p.currentTok.Literal
 			p.nextToken()
 		}
@@ -441,6 +454,10 @@ func (p *parser) parseBlock(closing tokenType) []component {
 				}
 			}
 		} else {
+			if p.curTokenIs(backslash) {
+				p.nextToken()
+			}
+
 			if !(p.currentTok.Type == space && p.peekTokenIs(closing)) {
 				blockString += p.currentTok.Literal
 			}

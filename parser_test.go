@@ -1297,6 +1297,40 @@ func main() {
 	}
 }
 
+func TestParseBackslash(t *testing.T) {
+	inputs := map[string][]component{
+		`\$0.69 is not enough for chicken nugget`: {
+			&paragraph{Content: []component{&fragment{Value: "$0.69 is not enough for chicken nugget"}}},
+		},
+		`Having *italic maths 23\*3=69*`: {
+			&paragraph{Content: []component{
+				&fragment{Value: "Having "},
+				&italic{Content: []component{
+					&fragment{Value: "italic maths 23*3=69"},
+				}},
+			}},
+		},
+		`**Bold components cost \$4.20 \*jk**`: {
+			&bold{Content: []component{
+				&fragment{Value: "Bold components cost $4.20 *jk"},
+			}},
+		},
+		`> Quoted at \$4.20 each`: {
+			&blockQuote{Content: []component{
+				&fragment{Value: "Quoted at $4.20 each"},
+			}},
+		},
+	}
+
+	for test, expected := range inputs {
+		actual := execute(t, test)
+		if !reflect.DeepEqual(actual, expected) {
+			fail(t, fmt.Sprintf("Expected %q, got=%q", expected, actual))
+		}
+	}
+
+}
+
 func TestParser(t *testing.T) {
 	inputs := map[string][]component{
 		"test\ntest": {

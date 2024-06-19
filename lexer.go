@@ -138,7 +138,7 @@ func isClosingPair(ch byte) bool {
 
 func (l *lexer) readWord() string {
 	position := l.position
-	for !isWhitespace(l.ch) && !isClosingPair(l.ch) && l.ch != '=' && l.ch != 0 {
+	for !isWhitespace(l.ch) && !isClosingPair(l.ch) && l.ch != '=' && l.ch != 0 && l.ch != '\\' {
 		l.readChar()
 	}
 	return l.input[position:l.position]

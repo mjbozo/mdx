@@ -249,7 +249,7 @@ type code struct {
 }
 
 func (c *code) String() string {
-	return fmt.Sprintf("Code[%s]", c.Text)
+	return fmt.Sprintf("Code{%s}", c.Text)
 }
 
 func (c *code) Raw() string {
@@ -458,6 +458,10 @@ func (bq *blockQuote) Raw() string {
 
 func (bq *blockQuote) Type() ComponentType {
 	return Block
+}
+
+func (bq *blockQuote) String() string {
+	return fmt.Sprintf("BlockQuote{Content=[%s]}\n", bq.InnerHtml())
 }
 
 func (bq *blockQuote) Html(indentLevel int) string {
