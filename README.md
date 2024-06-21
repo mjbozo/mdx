@@ -20,7 +20,7 @@ If you wish to use MDX as a command line tool for generating HTML files.
 ### Import
 Add MDX to your Go project by running
 ```
-go get https://github.com/mjbozo/mdx
+go install https://github.com/mjbozo/mdx
 ```
 
 ### Generation
